@@ -59,11 +59,11 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="12dp"
+        android:padding="8dp"
         android:background="@android:color/white"
         android:layout_marginTop="1dp">
 
-        <!-- PC登录区域：验证码图片+输入框+刷新+状态+登录按钮 同一行 -->
+        <!-- 第一行：PC验证码 -->
         <LinearLayout
             android:id="@+id/layoutPcCaptcha"
             android:layout_width="match_parent"
@@ -74,43 +74,44 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PC:"
+                android:text="验证码"
                 android:textSize="12sp"
-                android:textColor="#333333" />
+                android:textColor="#666666" />
 
             <ImageView
                 android:id="@+id/imgPcCaptcha"
-                android:layout_width="70dp"
-                android:layout_height="26dp"
-                android:layout_marginStart="4dp"
+                android:layout_width="72dp"
+                android:layout_height="24dp"
+                android:layout_marginStart="6dp"
                 android:background="#F3F4F6"
                 android:scaleType="fitCenter"
                 android:contentDescription="验证码" />
 
             <EditText
                 android:id="@+id/etPcCaptcha"
-                android:layout_width="60dp"
-                android:layout_height="28dp"
+                android:layout_width="56dp"
+                android:layout_height="24dp"
                 android:layout_marginStart="4dp"
                 android:hint="验证码"
                 android:textSize="11sp"
                 android:background="@drawable/bg_edittext"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
                 android:inputType="text"
                 android:maxLength="4"
                 android:gravity="center" />
 
             <Button
                 android:id="@+id/btnRefreshCaptcha"
-                android:layout_width="40dp"
-                android:layout_height="28dp"
+                android:layout_width="36dp"
+                android:layout_height="24dp"
                 android:text="刷"
                 android:textSize="10sp"
                 android:backgroundTint="#6B7280"
                 android:textColor="@android:color/white"
                 android:layout_marginStart="2dp"
-                android:minWidth="32dp"
+                android:minWidth="28dp"
+                android:minHeight="0dp"
                 android:padding="0dp" />
 
             <TextView
@@ -120,54 +121,57 @@
                 android:text="未登录"
                 android:textSize="10sp"
                 android:textColor="#EF4444"
-                android:layout_marginStart="4dp" />
+                android:layout_marginStart="6dp" />
 
             <Button
                 android:id="@+id/btnPcLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="28dp"
+                android:layout_width="48dp"
+                android:layout_height="24dp"
                 android:text="登录"
                 android:textSize="10sp"
                 android:backgroundTint="#10B981"
                 android:textColor="@android:color/white"
                 android:layout_marginStart="2dp"
-                android:minWidth="40dp"
+                android:minWidth="36dp"
+                android:minHeight="0dp"
                 android:padding="0dp" />
         </LinearLayout>
 
-        <!-- APP登录区域 -->
+        <!-- 第二行：APP登录 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
+            android:layout_marginTop="6dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="APP登录:"
-                android:textSize="13sp"
-                android:textColor="#333333" />
+                android:text="APP"
+                android:textSize="12sp"
+                android:textColor="#666666" />
 
             <Spinner
                 android:id="@+id/spinnerAppAccount"
                 android:layout_width="0dp"
-                android:layout_height="32dp"
+                android:layout_height="26dp"
                 android:layout_weight="1"
-                android:layout_marginStart="8dp"
+                android:layout_marginStart="6dp"
                 android:background="@drawable/bg_spinner"
-                android:padding="4dp" />
+                android:paddingStart="4dp"
+                android:paddingEnd="4dp"
+                android:dropDownWidth="120dp" />
 
             <TextView
                 android:id="@+id/tvImei"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="IMEI: -"
-                android:textSize="10sp"
-                android:textColor="#6B7280"
+                android:text="IMEI:-"
+                android:textSize="9sp"
+                android:textColor="#9CA3AF"
                 android:layout_marginStart="4dp"
-                android:maxWidth="80dp"
+                android:maxWidth="60dp"
                 android:ellipsize="end" />
 
             <TextView
@@ -175,20 +179,22 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="未登录"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textColor="#EF4444"
                 android:layout_marginStart="4dp" />
 
             <Button
                 android:id="@+id/btnAppLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="APP登录"
-                android:textSize="11sp"
+                android:layout_width="52dp"
+                android:layout_height="26dp"
+                android:text="登录"
+                android:textSize="10sp"
                 android:backgroundTint="#2563EB"
                 android:textColor="@android:color/white"
                 android:layout_marginStart="4dp"
-                android:minWidth="60dp" />
+                android:minWidth="40dp"
+                android:minHeight="0dp"
+                android:padding="0dp" />
         </LinearLayout>
     </LinearLayout>
 
@@ -197,41 +203,29 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="12dp"
+        android:padding="8dp"
         android:background="@android:color/white"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="1dp"
         android:gravity="center_vertical">
 
-        <LinearLayout
+        <CheckBox
+            android:id="@+id/cbAutoAccept"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:text="自动接单"
+            android:textSize="12sp"
+            android:checked="true"
+            android:minHeight="0dp" />
 
-            <CheckBox
-                android:id="@+id/cbAutoAccept"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="自动接单"
-                android:textSize="13sp"
-                android:checked="true" />
-        </LinearLayout>
-
-        <LinearLayout
+        <CheckBox
+            android:id="@+id/cbAutoRevert"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginStart="12dp">
-
-            <CheckBox
-                android:id="@+id/cbAutoRevert"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="自动回单"
-                android:textSize="13sp"
-                android:checked="true" />
-        </LinearLayout>
+            android:text="自动回单"
+            android:textSize="12sp"
+            android:checked="true"
+            android:layout_marginStart="12dp"
+            android:minHeight="0dp" />
 
         <View
             android:layout_width="0dp"
@@ -241,21 +235,29 @@
         <Button
             android:id="@+id/btnStartShuyun"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
-            android:text="启动监控"
-            android:textSize="12sp"
+            android:layout_height="28dp"
+            android:text="启动"
+            android:textSize="11sp"
             android:backgroundTint="#2563EB"
-            android:textColor="@android:color/white" />
+            android:textColor="@android:color/white"
+            android:minWidth="50dp"
+            android:minHeight="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp" />
 
         <Button
             android:id="@+id/btnStopShuyun"
             android:layout_width="wrap_content"
-            android:layout_height="36dp"
+            android:layout_height="28dp"
             android:text="停止"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:backgroundTint="#EF4444"
             android:textColor="@android:color/white"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="6dp"
+            android:minWidth="40dp"
+            android:minHeight="0dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
             android:enabled="false" />
     </LinearLayout>
 
@@ -263,14 +265,15 @@
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayoutShuyun"
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="32dp"
         android:background="@android:color/white"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="1dp"
         app:tabIndicatorColor="#2563EB"
         app:tabSelectedTextColor="#2563EB"
         app:tabTextColor="#666666"
         app:tabMode="fixed"
-        app:tabGravity="fill">
+        app:tabGravity="fill"
+        app:tabTextAppearance="@style/TabTextStyle">
 
         <com.google.android.material.tabs.TabItem
             android:layout_width="wrap_content"
@@ -296,7 +299,7 @@
             android:id="@+id/rvPending"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:padding="6dp"
             android:clipToPadding="false"
             android:visibility="visible" />
 
@@ -305,7 +308,7 @@
             android:id="@+id/rvProcessing"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:padding="8dp"
+            android:padding="6dp"
             android:clipToPadding="false"
             android:visibility="gone" />
 
@@ -316,7 +319,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="暂无数据"
-            android:textSize="16sp"
+            android:textSize="14sp"
             android:textColor="#999999"
             android:visibility="gone" />
 
@@ -325,7 +328,7 @@
     <!-- 日志区域 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="120dp"
+        android:layout_height="100dp"
         android:orientation="vertical"
         android:background="#1F2937"
         android:layout_marginTop="1dp">
@@ -334,28 +337,28 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="运行日志"
-            android:textSize="12sp"
+            android:textSize="11sp"
             android:textColor="#9CA3AF"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="6dp"
+            android:paddingBottom="4dp"
             android:background="#111827" />
 
         <ScrollView
             android:id="@+id/svLog"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:paddingLeft="12dp"
-            android:paddingRight="12dp"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp">
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="6dp">
 
             <TextView
                 android:id="@+id/tvLog"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textColor="#E5E7EB"
                 android:fontFamily="monospace"
                 android:lineSpacingMultiplier="1.2" />

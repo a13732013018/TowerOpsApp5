@@ -488,6 +488,7 @@ public class ShuyunMonitorFragment extends Fragment {
             callback.onMonitorStatusChanged(true);
         }
 
+        // 启动监控线程
         monitorThread = new Thread(() -> {
             while (isRunning) {
                 try {

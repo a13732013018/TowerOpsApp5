@@ -78,6 +78,23 @@ public class ShuyunApi {
     }
 
     /**
+     * 解析验证码返回的Base64图片
+     */
+    public static android.graphics.Bitmap parseCaptchaImage(String jsonStr) {
+        try {
+            JSONObject root = new JSONObject(jsonStr);
+            String base64Image = root.optString("image", "");
+            if (!base64Image.isEmpty()) {
+                byte[] imageBytes = android.util.Base64.decode(base64Image, android.util.Base64.DEFAULT);
+                return android.graphics.BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * 解析验证码返回的数学运算题目（如果有）
      * 返回格式如：{"num1": 5, "num2": 3, "symbol": "+"}
      */
@@ -136,7 +153,7 @@ public class ShuyunApi {
     }
 
     /**
-     * 获取验证码图片和IP
+     * 获取验证码图片和IP（从JSON中解析Base64图片）
      * @return CaptchaResult包含图片和IP
      */
     public static CaptchaResult getCaptcha() {
@@ -154,9 +171,8 @@ public class ShuyunApi {
             // 解析数学题
             result.math = parseMathCode(jsonStr);
 
-            // 获取验证码图片
-            String imgUrl = PC_BASE + "/api/auth/jwt/getImgcodeImage?ip=" + result.ip;
-            result.image = getImageBitmap(imgUrl);
+            // 从JSON中解析Base64图片
+            result.image = parseCaptchaImage(jsonStr);
 
         } catch (Exception e) {
             e.printStackTrace();
