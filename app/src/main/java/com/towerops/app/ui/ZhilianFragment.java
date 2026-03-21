@@ -8,9 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import androidx.appcompat.app.AlertDialog;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -40,6 +43,7 @@ public class ZhilianFragment extends Fragment {
     private TextView tvZhilianStatus, tvUnclaimedCount, tvClaimedCount, tvLog;
     private CheckBox cbAutoAccept, cbAutoRevert;
     private Button btnStartZhilian, btnStopZhilian;
+    private ImageView ivAutoAcceptInfo, ivAutoRevertInfo;
     private TabLayout tabLayoutZhilian;
     private RecyclerView rvUnclaimed, rvClaimed;
     private ScrollView svLog;
@@ -89,6 +93,8 @@ public class ZhilianFragment extends Fragment {
         rvClaimed = view.findViewById(R.id.rvClaimed);
         svLog = view.findViewById(R.id.svLog);
         tvEmpty = view.findViewById(R.id.tvEmpty);
+        ivAutoAcceptInfo = view.findViewById(R.id.ivAutoAcceptInfo);
+        ivAutoRevertInfo = view.findViewById(R.id.ivAutoRevertInfo);
     }
 
     private void setupRecyclerViews() {
@@ -159,6 +165,33 @@ public class ZhilianFragment extends Fragment {
         // 配置变更监听
         cbAutoAccept.setOnCheckedChangeListener((buttonView, isChecked) -> saveConfig());
         cbAutoRevert.setOnCheckedChangeListener((buttonView, isChecked) -> saveConfig());
+
+        // 提示图标点击事件
+        ivAutoAcceptInfo.setOnClickListener(v -> showAutoAcceptInfo());
+        ivAutoRevertInfo.setOnClickListener(v -> showAutoRevertInfo());
+    }
+
+    private void showAutoAcceptInfo() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("自动接单说明")
+                .setMessage("开启后，系统会自动监测未领取工单列表，当未领取工单数量少于10条时，自动执行接单操作。\n\n" +
+                        "• 接单延迟：2.5-6秒随机延迟，模拟人工操作\n" +
+                        "• 防并发：使用网络锁确保操作安全\n" +
+                        "• 仅接取当前账号可处理的工单")
+                .setPositiveButton("知道了", null)
+                .show();
+    }
+
+    private void showAutoRevertInfo() {
+        new AlertDialog.Builder(requireContext())
+                .setTitle("自动回单说明")
+                .setMessage("开启后，系统会自动监测已领取工单列表，根据工单创建时间自动执行回单操作。\n\n" +
+                        "• 回单条件：创建时间超过300分钟（5小时）\n" +
+                        "• 回单延迟：5-12秒随机延迟\n" +
+                        "• 反馈内容：故障停电/站点设备故障\n" +
+                        "• 防并发：使用操作时序锁确保安全")
+                .setPositiveButton("知道了", null)
+                .show();
     }
 
     private void loadConfig() {
@@ -229,6 +262,7 @@ public class ZhilianFragment extends Fragment {
         monitorThread.start();
 
         btnStartZhilian.setEnabled(false);
+        btnStartZhilian.setText("监控中");
         btnStopZhilian.setEnabled(true);
 
         appendLog("智联监控已启动");
@@ -246,6 +280,7 @@ public class ZhilianFragment extends Fragment {
         }
 
         btnStartZhilian.setEnabled(true);
+        btnStartZhilian.setText("启动监控");
         btnStopZhilian.setEnabled(false);
 
         tvZhilianStatus.setText("智联监控已停止");

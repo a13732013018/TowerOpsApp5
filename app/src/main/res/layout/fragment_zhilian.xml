@@ -52,22 +52,52 @@
         android:background="@android:color/white"
         android:layout_marginTop="1dp">
 
-        <CheckBox
-            android:id="@+id/cbAutoAccept"
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="自动接单"
-            android:textSize="13sp"
-            android:checked="false" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-        <CheckBox
-            android:id="@+id/cbAutoRevert"
+            <CheckBox
+                android:id="@+id/cbAutoAccept"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="自动接单"
+                android:textSize="13sp"
+                android:checked="false" />
+
+            <ImageView
+                android:id="@+id/ivAutoAcceptInfo"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="4dp"
+                android:src="@android:drawable/ic_menu_info_details"
+                android:tint="#9CA3AF" />
+        </LinearLayout>
+
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="自动回单"
-            android:textSize="13sp"
-            android:checked="false"
-            android:layout_marginStart="16dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginStart="12dp">
+
+            <CheckBox
+                android:id="@+id/cbAutoRevert"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="自动回单"
+                android:textSize="13sp"
+                android:checked="false" />
+
+            <ImageView
+                android:id="@+id/ivAutoRevertInfo"
+                android:layout_width="16dp"
+                android:layout_height="16dp"
+                android:layout_marginStart="4dp"
+                android:src="@android:drawable/ic_menu_info_details"
+                android:tint="#9CA3AF" />
+        </LinearLayout>
 
         <View
             android:layout_width="0dp"
