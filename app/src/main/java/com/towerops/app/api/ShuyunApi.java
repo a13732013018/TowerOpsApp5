@@ -756,7 +756,7 @@ public class ShuyunApi {
      * @return 工单列表JSON
      */
     public static String getCountyTaskList(String pcToken, String userId) {
-        // 与易语言一致：URL带参数 + POST body也有参数
+        // 与易语言完全一致：URL带参数，使用GET请求
         String url = PC_BASE + "/api/flowable/flowable/task/listTodo"
                 + "?page=1"
                 + "&limit=10"
@@ -767,19 +767,10 @@ public class ShuyunApi {
                 + "&area="
                 + "&cityArea=";
 
-        // POST body参数（与易语言一致）
-        String post = "page=1"
-                + "&limit=10"
-                + "&userId=" + userId
-                + "&flowId=1025,1054,1055,1056,1131,1027,1028,1033,1038,1040,1048,1072,1118,1122,1127,1137,1143,1063"
-                + "&orderType="
-                + "&xmlx="
-                + "&area="
-                + "&cityArea=";
-
+        // 与易语言一致：使用GET请求（参数已在URL中）
         String headers = buildCountyApiHeader(pcToken);
         try {
-            String result = HttpUtil.post(url, post, headers, null);
+            String result = HttpUtil.get(url, headers, null);
             return result != null ? result : "";
         } catch (Exception e) {
             e.printStackTrace();
