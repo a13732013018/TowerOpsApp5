@@ -63,8 +63,9 @@
         android:background="@android:color/white"
         android:layout_marginTop="1dp">
 
-        <!-- PC登录区域 -->
+        <!-- PC登录区域：验证码图片+输入框+刷新+状态+登录按钮 同一行 -->
         <LinearLayout
+            android:id="@+id/layoutPcCaptcha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
@@ -73,81 +74,65 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="PC登录:"
-                android:textSize="13sp"
+                android:text="PC:"
+                android:textSize="12sp"
                 android:textColor="#333333" />
-
-            <Spinner
-                android:id="@+id/spinnerPcAccount"
-                android:layout_width="0dp"
-                android:layout_height="32dp"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:background="@drawable/bg_spinner"
-                android:padding="4dp" />
-
-            <TextView
-                android:id="@+id/tvPcLoginStatus"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="未登录"
-                android:textSize="11sp"
-                android:textColor="#EF4444"
-                android:layout_marginStart="8dp" />
-
-            <Button
-                android:id="@+id/btnPcLogin"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="PC登录"
-                android:textSize="11sp"
-                android:backgroundTint="#10B981"
-                android:textColor="@android:color/white"
-                android:layout_marginStart="4dp"
-                android:minWidth="60dp" />
-        </LinearLayout>
-
-        <!-- PC验证码区域 -->
-        <LinearLayout
-            android:id="@+id/layoutPcCaptcha"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
-            android:layout_marginTop="8dp">
 
             <ImageView
                 android:id="@+id/imgPcCaptcha"
-                android:layout_width="80dp"
-                android:layout_height="28dp"
+                android:layout_width="70dp"
+                android:layout_height="26dp"
+                android:layout_marginStart="4dp"
                 android:background="#F3F4F6"
                 android:scaleType="fitCenter"
                 android:contentDescription="验证码" />
 
             <EditText
                 android:id="@+id/etPcCaptcha"
-                android:layout_width="0dp"
-                android:layout_height="32dp"
-                android:layout_weight="1"
-                android:layout_marginStart="8dp"
-                android:hint="请输入验证码"
-                android:textSize="12sp"
+                android:layout_width="60dp"
+                android:layout_height="28dp"
+                android:layout_marginStart="4dp"
+                android:hint="验证码"
+                android:textSize="11sp"
                 android:background="@drawable/bg_edittext"
-                android:paddingStart="8dp"
-                android:paddingEnd="8dp"
+                android:paddingStart="6dp"
+                android:paddingEnd="6dp"
                 android:inputType="text"
-                android:maxLength="4" />
+                android:maxLength="4"
+                android:gravity="center" />
 
             <Button
                 android:id="@+id/btnRefreshCaptcha"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="刷新"
-                android:textSize="11sp"
+                android:layout_width="40dp"
+                android:layout_height="28dp"
+                android:text="刷"
+                android:textSize="10sp"
                 android:backgroundTint="#6B7280"
                 android:textColor="@android:color/white"
-                android:layout_marginStart="4dp"
-                android:minWidth="50dp" />
+                android:layout_marginStart="2dp"
+                android:minWidth="32dp"
+                android:padding="0dp" />
+
+            <TextView
+                android:id="@+id/tvPcLoginStatus"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="未登录"
+                android:textSize="10sp"
+                android:textColor="#EF4444"
+                android:layout_marginStart="4dp" />
+
+            <Button
+                android:id="@+id/btnPcLogin"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:text="登录"
+                android:textSize="10sp"
+                android:backgroundTint="#10B981"
+                android:textColor="@android:color/white"
+                android:layout_marginStart="2dp"
+                android:minWidth="40dp"
+                android:padding="0dp" />
         </LinearLayout>
 
         <!-- APP登录区域 -->

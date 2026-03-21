@@ -1,5 +1,8 @@
 package com.towerops.app.api;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
 import com.towerops.app.model.Session;
 import com.towerops.app.util.HttpUtil;
 
@@ -52,14 +55,46 @@ public class ShuyunApi {
      */
     public static String getImgcode() {
         String url = PC_BASE + "/api/auth/jwt/getImgcode";
-        String headers = buildPcHeader();
         try {
-            String result = HttpUtil.get(url, headers, null);
+            String result = HttpUtil.get(url, null, null);
             return result != null ? result : "";
         } catch (Exception e) {
             e.printStackTrace();
             return "";
         }
+    }
+
+    /**
+     * 获取验证码图片（返回Bitmap和IP）
+     * @return CaptchaResult包含image和ip
+     */
+    public static CaptchaResult getCaptcha() {
+        CaptchaResult result = new CaptchaResult();
+        try {
+            // 先获取IP
+            String jsonStr = getImgcode();
+            result.ip = parseIp(jsonStr);
+
+            // 如果有IP，获取验证码图片
+            if (!result.ip.isEmpty()) {
+                String imgUrl = "http://" + result.ip + "/api/auth/jwt/getImgcode?rand=" + System.currentTimeMillis();
+                byte[] imageBytes = HttpUtil.getBytes(imgUrl);
+                if (imageBytes != null && imageBytes.length > 0) {
+                    result.image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 验证码结果封装
+     */
+    public static class CaptchaResult {
+        public Bitmap image = null;
+        public String ip = "";
     }
 
     /**

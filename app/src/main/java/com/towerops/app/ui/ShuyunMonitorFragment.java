@@ -163,8 +163,7 @@ public class ShuyunMonitorFragment extends Fragment {
         tvEmpty = view.findViewById(R.id.tvEmpty);
         svLog = view.findViewById(R.id.svLog);
 
-        // 登录控件
-        spinnerPcAccount = view.findViewById(R.id.spinnerPcAccount);
+        // 登录控件（PC账号选择器已移除）
         spinnerAppAccount = view.findViewById(R.id.spinnerAppAccount);
         imgPcCaptcha = view.findViewById(R.id.imgPcCaptcha);
         etPcCaptcha = view.findViewById(R.id.etPcCaptcha);
@@ -212,13 +211,6 @@ public class ShuyunMonitorFragment extends Fragment {
     }
 
     private void initAccountSpinners() {
-        // PC账号
-        String[] pcAccounts = ShuyunAccountConfig.getPCDisplayNames();
-        ArrayAdapter<String> pcAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, pcAccounts);
-        pcAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPcAccount.setAdapter(pcAdapter);
-
         // APP账号
         String[] appAccounts = ShuyunAccountConfig.getAPPDisplayNames();
         ArrayAdapter<String> appAdapter = new ArrayAdapter<>(requireContext(),
@@ -244,17 +236,6 @@ public class ShuyunMonitorFragment extends Fragment {
 
             @Override
             public void onTabReselected(TabLayout.Tab tab) {}
-        });
-
-        // PC账号选择
-        spinnerPcAccount.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                selectedPcAccountIndex = position;
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
         });
 
         // APP账号选择
@@ -368,12 +349,13 @@ public class ShuyunMonitorFragment extends Fragment {
 
         new Thread(() -> {
             try {
-                ShuyunAccountConfig.Account account = ShuyunAccountConfig.getPCAccount(selectedPcAccountIndex);
+                // 使用第一个PC账号
+                ShuyunAccountConfig.Account account = ShuyunAccountConfig.getPCAccount(0);
                 if (account == null) {
                     mainHandler.post(() -> {
-                        Toast.makeText(getContext(), "请选择PC账号", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(), "未配置PC账号", Toast.LENGTH_SHORT).show();
                         btnPcLogin.setEnabled(true);
-                        btnPcLogin.setText("PC登录");
+                        btnPcLogin.setText("登录");
                     });
                     return;
                 }
