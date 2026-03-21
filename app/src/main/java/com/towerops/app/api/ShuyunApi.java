@@ -756,7 +756,16 @@ public class ShuyunApi {
      * @return 工单列表JSON
      */
     public static String getCountyTaskList(String pcToken, String userId) {
-        String url = PC_BASE + "/api/flowable/flowable/task/listTodo";
+        // 与易语言一致：URL带参数 + POST body也有参数
+        String url = PC_BASE + "/api/flowable/flowable/task/listTodo"
+                + "?page=1"
+                + "&limit=10"
+                + "&userId=" + userId
+                + "&flowId=1025,1054,1055,1056,1131,1027,1028,1033,1038,1040,1048,1072,1118,1122,1127,1137,1143,1063"
+                + "&orderType="
+                + "&xmlx="
+                + "&area="
+                + "&cityArea=";
 
         // POST body参数（与易语言一致）
         String post = "page=1"
