@@ -53,7 +53,6 @@ public class WorkOrderFragment extends Fragment {
         TextView btnSortFeedbackTime = view.findViewById(R.id.btnSortFeedbackTime);
         TextView btnSortAlertTime = view.findViewById(R.id.btnSortAlertTime);
         TextView btnSortAlertStatus = view.findViewById(R.id.btnSortAlertStatus);
-        TextView tvSortDesc = view.findViewById(R.id.tvSortDesc);
 
         // 按钮背景资源
         int bgPrimary = R.drawable.bg_tag_primary;
@@ -66,11 +65,6 @@ public class WorkOrderFragment extends Fragment {
                 adapter.setSortMode(cur == WorkOrderAdapter.SortMode.BILL_TIME_DESC
                         ? WorkOrderAdapter.SortMode.BILL_TIME_ASC
                         : WorkOrderAdapter.SortMode.BILL_TIME_DESC);
-                // 更新排序描述
-                if (tvSortDesc != null) {
-                    boolean asc = adapter.getSortMode() == WorkOrderAdapter.SortMode.BILL_TIME_ASC;
-                    tvSortDesc.setText("工单历时 " + (asc ? "小→大" : "大→小"));
-                }
                 // 更新按钮样式
                 updateSortButtonStyles(btnSortBillTime, btnSortFeedbackTime, btnSortAlertTime, btnSortAlertStatus, bgPrimary, bgSecondary);
             });
@@ -82,11 +76,6 @@ public class WorkOrderFragment extends Fragment {
                 adapter.setSortMode(cur == WorkOrderAdapter.SortMode.FEEDBACK_TIME_DESC
                         ? WorkOrderAdapter.SortMode.FEEDBACK_TIME_ASC
                         : WorkOrderAdapter.SortMode.FEEDBACK_TIME_DESC);
-                // 更新排序描述
-                if (tvSortDesc != null) {
-                    boolean asc = adapter.getSortMode() == WorkOrderAdapter.SortMode.FEEDBACK_TIME_ASC;
-                    tvSortDesc.setText("反馈历时 " + (asc ? "小→大" : "大→小"));
-                }
                 // 更新按钮样式
                 updateSortButtonStyles(btnSortBillTime, btnSortFeedbackTime, btnSortAlertTime, btnSortAlertStatus, bgPrimary, bgSecondary);
             });
@@ -98,11 +87,6 @@ public class WorkOrderFragment extends Fragment {
                 adapter.setSortMode(cur == WorkOrderAdapter.SortMode.ALERT_TIME_DESC
                         ? WorkOrderAdapter.SortMode.ALERT_TIME_ASC
                         : WorkOrderAdapter.SortMode.ALERT_TIME_DESC);
-                // 更新排序描述
-                if (tvSortDesc != null) {
-                    boolean asc = adapter.getSortMode() == WorkOrderAdapter.SortMode.ALERT_TIME_ASC;
-                    tvSortDesc.setText("告警时间 " + (asc ? "最旧→最新" : "最新→最旧"));
-                }
                 // 更新按钮样式
                 updateSortButtonStyles(btnSortBillTime, btnSortFeedbackTime, btnSortAlertTime, btnSortAlertStatus, bgPrimary, bgSecondary);
             });
@@ -114,11 +98,6 @@ public class WorkOrderFragment extends Fragment {
                 adapter.setSortMode(cur == WorkOrderAdapter.SortMode.ALERT_STATUS_ALARM
                         ? WorkOrderAdapter.SortMode.ALERT_STATUS_RECOVER
                         : WorkOrderAdapter.SortMode.ALERT_STATUS_ALARM);
-                // 更新排序描述
-                if (tvSortDesc != null) {
-                    boolean alarm = adapter.getSortMode() == WorkOrderAdapter.SortMode.ALERT_STATUS_ALARM;
-                    tvSortDesc.setText("告警状态 " + (alarm ? "告警中优先" : "已恢复优先"));
-                }
                 // 更新按钮样式
                 updateSortButtonStyles(btnSortBillTime, btnSortFeedbackTime, btnSortAlertTime, btnSortAlertStatus, bgPrimary, bgSecondary);
             });

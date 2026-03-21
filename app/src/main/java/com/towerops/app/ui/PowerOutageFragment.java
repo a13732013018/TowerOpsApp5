@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,6 +24,7 @@ public class PowerOutageFragment extends Fragment {
 
     private PowerOutageAdapter adapter;
     private RecyclerView recyclerView;
+    private TextView btnSortVoltage, btnSortLoadCurrent, btnSortAlarmTime;
 
     public static PowerOutageFragment newInstance() {
         return new PowerOutageFragment();
@@ -53,8 +55,16 @@ public class PowerOutageFragment extends Fragment {
     private void setupSortButtons(View view) {
         if (adapter == null) return;
 
+        btnSortVoltage = view.findViewById(R.id.btnSortVoltage);
+        btnSortLoadCurrent = view.findViewById(R.id.btnSortLoadCurrent);
+        btnSortAlarmTime = view.findViewById(R.id.btnSortAlarmTime);
+
+        // 按钮背景资源
+        int bgPrimary = R.drawable.bg_tag_primary;
+        int bgSecondary = R.drawable.bg_tag_secondary;
+
         // 电压排序按钮
-        view.findViewById(R.id.btnSortVoltage).setOnClickListener(v -> {
+        btnSortVoltage.setOnClickListener(v -> {
             if (adapter == null) return;
             PowerOutageAdapter.SortMode cur = adapter.getSortMode();
             if (cur == PowerOutageAdapter.SortMode.VOLTAGE_DESC) {
@@ -62,10 +72,12 @@ public class PowerOutageFragment extends Fragment {
             } else {
                 adapter.setSortMode(PowerOutageAdapter.SortMode.VOLTAGE_DESC);
             }
+            // 更新按钮样式
+            updateSortButtonStyles(btnSortVoltage, btnSortLoadCurrent, btnSortAlarmTime, bgPrimary, bgSecondary);
         });
 
         // 负载电流排序按钮
-        view.findViewById(R.id.btnSortLoadCurrent).setOnClickListener(v -> {
+        btnSortLoadCurrent.setOnClickListener(v -> {
             if (adapter == null) return;
             PowerOutageAdapter.SortMode cur = adapter.getSortMode();
             if (cur == PowerOutageAdapter.SortMode.LOAD_CURRENT_DESC) {
@@ -73,10 +85,12 @@ public class PowerOutageFragment extends Fragment {
             } else {
                 adapter.setSortMode(PowerOutageAdapter.SortMode.LOAD_CURRENT_DESC);
             }
+            // 更新按钮样式
+            updateSortButtonStyles(btnSortVoltage, btnSortLoadCurrent, btnSortAlarmTime, bgPrimary, bgSecondary);
         });
 
         // 告警时间排序按钮
-        view.findViewById(R.id.btnSortAlarmTime).setOnClickListener(v -> {
+        btnSortAlarmTime.setOnClickListener(v -> {
             if (adapter == null) return;
             PowerOutageAdapter.SortMode cur = adapter.getSortMode();
             if (cur == PowerOutageAdapter.SortMode.ALARM_TIME_DESC) {
@@ -84,7 +98,46 @@ public class PowerOutageFragment extends Fragment {
             } else {
                 adapter.setSortMode(PowerOutageAdapter.SortMode.ALARM_TIME_DESC);
             }
+            // 更新按钮样式
+            updateSortButtonStyles(btnSortVoltage, btnSortLoadCurrent, btnSortAlarmTime, bgPrimary, bgSecondary);
         });
+    }
+
+    /** 更新排序按钮样式，高亮当前选中的排序按钮 */
+    private void updateSortButtonStyles(TextView btnVoltage, TextView btnLoadCurrent, TextView btnAlarmTime,
+                                         int bgPrimary, int bgSecondary) {
+        if (adapter == null) return;
+        PowerOutageAdapter.SortMode cur = adapter.getSortMode();
+
+        // 先全部设为次要样式
+        btnVoltage.setBackgroundResource(bgSecondary);
+        btnVoltage.setTextColor(requireContext().getColor(R.color.text_secondary));
+        btnLoadCurrent.setBackgroundResource(bgSecondary);
+        btnLoadCurrent.setTextColor(requireContext().getColor(R.color.text_secondary));
+        btnAlarmTime.setBackgroundResource(bgSecondary);
+        btnAlarmTime.setTextColor(requireContext().getColor(R.color.text_secondary));
+
+        // 当前选中的按钮设为主要样式
+        switch (cur) {
+            case VOLTAGE_DESC:
+            case VOLTAGE_ASC:
+                btnVoltage.setBackgroundResource(bgPrimary);
+                btnVoltage.setTextColor(requireContext().getColor(R.color.text_inverse));
+                btnVoltage.setText(cur == PowerOutageAdapter.SortMode.VOLTAGE_ASC ? "电压 ↑" : "电压 ↓");
+                break;
+            case LOAD_CURRENT_DESC:
+            case LOAD_CURRENT_ASC:
+                btnLoadCurrent.setBackgroundResource(bgPrimary);
+                btnLoadCurrent.setTextColor(requireContext().getColor(R.color.text_inverse));
+                btnLoadCurrent.setText(cur == PowerOutageAdapter.SortMode.LOAD_CURRENT_ASC ? "负载电流 ↑" : "负载电流 ↓");
+                break;
+            case ALARM_TIME_DESC:
+            case ALARM_TIME_ASC:
+                btnAlarmTime.setBackgroundResource(bgPrimary);
+                btnAlarmTime.setTextColor(requireContext().getColor(R.color.text_inverse));
+                btnAlarmTime.setText(cur == PowerOutageAdapter.SortMode.ALARM_TIME_ASC ? "告警时间 ↑" : "告警时间 ↓");
+                break;
+        }
     }
 
     /**
