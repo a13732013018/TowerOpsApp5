@@ -35,10 +35,30 @@ public class Session {
      */
     public volatile String realname     = "";
 
+    // ---------- 智联工单相关 ----------
+    /**
+     * c_sign 签名，用于智联工单接口
+     * 从登录响应或配置中获取
+     */
+    public volatile String cSign        = "E9163ADC4E8E9B20293C8FC11A78E652";
+
+    /**
+     * 运维账号信息数组（对应易语言的运维账号信息数组）
+     * 用于智联工单接单时的用户名参数
+     */
+    public volatile String[] accountConfig = new String[0];
+
     // ---------- 运行时配置（主线程写，工作线程读）----------
     // ★ appConfig 同时保存在内存和 SharedPreferences，服务重建后可从 prefs 恢复 ★
     public volatile String appConfig    = ""; // 选1|选2|选5|阈值反馈|阈值接单 用 \u0001 分隔
     public volatile String[] taskArray  = new String[0];
+
+    // ---------- 智联工单配置 ----------
+    /**
+     * 智联工单配置：enableAccept|enableRevert|minRevertDelay|maxRevertDelay
+     * 用 \u0001 分隔
+     */
+    public volatile String zhilianConfig = "";
 
     private static final String PREF_SESSION    = "session_prefs";
     private static final String KEY_APP_CONFIG  = "app_config";

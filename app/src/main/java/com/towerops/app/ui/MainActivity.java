@@ -377,15 +377,21 @@ public class MainActivity extends AppCompatActivity {
         // ===== 设置ViewPager2 =====
         pagerAdapter = new MainPagerAdapter(this);
         viewPager.setAdapter(pagerAdapter);
-        // 设置 offscreenPageLimit 确保两个 Fragment 都保持活跃状态
-        viewPager.setOffscreenPageLimit(1);
+        // 设置 offscreenPageLimit 确保三个 Fragment 都保持活跃状态
+        viewPager.setOffscreenPageLimit(2);
 
         // 连接TabLayout和ViewPager2，实现滑动切换
         new TabLayoutMediator(tabLayout, viewPager, (tab, position) -> {
-            if (position == 0) {
-                tab.setText("工单监控");
-            } else {
-                tab.setText("停电监控");
+            switch (position) {
+                case 0:
+                    tab.setText("工单监控");
+                    break;
+                case 1:
+                    tab.setText("停电监控");
+                    break;
+                case 2:
+                    tab.setText("智联工单");
+                    break;
             }
         }).attach();
     }

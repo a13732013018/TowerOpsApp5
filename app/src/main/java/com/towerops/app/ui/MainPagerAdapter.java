@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * ViewPager2适配器 - 用于工单监控和停电监控Tab切换
+ * ViewPager2适配器 - 用于工单监控、停电监控和智联工单Tab切换
  */
 public class MainPagerAdapter extends FragmentStateAdapter {
 
-    private static final int TAB_COUNT = 2;
+    private static final int TAB_COUNT = 3;  // 增加智联工单Tab
     private final List<Fragment> fragments = new ArrayList<>();
 
     public MainPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
@@ -30,6 +30,9 @@ public class MainPagerAdapter extends FragmentStateAdapter {
                 break;
             case 1:
                 fragment = PowerOutageFragment.newInstance();
+                break;
+            case 2:
+                fragment = new ZhilianFragment();  // 智联工单
                 break;
             default:
                 fragment = WorkOrderFragment.newInstance();

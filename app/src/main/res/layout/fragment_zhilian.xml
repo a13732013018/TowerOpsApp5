@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F7FA">
+
+    <!-- 状态栏 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="@android:color/white"
+        android:elevation="2dp">
+
+        <TextView
+            android:id="@+id/tvZhilianStatus"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="智联监控未启动"
+            android:textSize="14sp"
+            android:textColor="#333333"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/tvUnclaimedCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="未领取: 0"
+            android:textSize="13sp"
+            android:textColor="#2563EB"
+            android:layout_marginEnd="16dp" />
+
+        <TextView
+            android:id="@+id/tvClaimedCount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="已领取: 0"
+            android:textSize="13sp"
+            android:textColor="#10B981" />
+    </LinearLayout>
+
+    <!-- 控制面板 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:padding="12dp"
+        android:background="@android:color/white"
+        android:layout_marginTop="1dp">
+
+        <CheckBox
+            android:id="@+id/cbAutoAccept"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自动接单"
+            android:textSize="13sp"
+            android:checked="false" />
+
+        <CheckBox
+            android:id="@+id/cbAutoRevert"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="自动回单"
+            android:textSize="13sp"
+            android:checked="false"
+            android:layout_marginStart="16dp" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1" />
+
+        <Button
+            android:id="@+id/btnStartZhilian"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="启动监控"
+            android:textSize="12sp"
+            android:backgroundTint="#2563EB"
+            android:textColor="@android:color/white" />
+
+        <Button
+            android:id="@+id/btnStopZhilian"
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:text="停止"
+            android:textSize="12sp"
+            android:backgroundTint="#EF4444"
+            android:textColor="@android:color/white"
+            android:layout_marginStart="8dp"
+            android:enabled="false" />
+    </LinearLayout>
+
+    <!-- Tab 切换 -->
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabLayoutZhilian"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:background="@android:color/white"
+        android:layout_marginTop="8dp"
+        app:tabIndicatorColor="#2563EB"
+        app:tabSelectedTextColor="#2563EB"
+        app:tabTextColor="#666666"
+        app:tabMode="fixed"
+        app:tabGravity="fill">
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="未领取" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="已领取" />
+
+    </com.google.android.material.tabs.TabLayout>
+
+    <!-- 列表区域 -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="1dp">
+
+        <!-- 未领取列表 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvUnclaimed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:clipToPadding="false"
+            android:visibility="visible" />
+
+        <!-- 已领取列表 -->
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvClaimed"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp"
+            android:clipToPadding="false"
+            android:visibility="gone" />
+
+        <!-- 空状态 -->
+        <TextView
+            android:id="@+id/tvEmpty"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:text="暂无数据"
+            android:textSize="16sp"
+            android:textColor="#999999"
+            android:visibility="gone" />
+
+    </FrameLayout>
+
+    <!-- 日志区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:orientation="vertical"
+        android:background="#1F2937"
+        android:layout_marginTop="1dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="运行日志"
+            android:textSize="12sp"
+            android:textColor="#9CA3AF"
+            android:padding="8dp 12dp"
+            android:background="#111827" />
+
+        <ScrollView
+            android:id="@+id/svLog"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="8dp 12dp">
+
+            <TextView
+                android:id="@+id/tvLog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="11sp"
+                android:textColor="#E5E7EB"
+                android:fontFamily="monospace"
+                android:lineSpacingMultiplier="1.2" />
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout>
