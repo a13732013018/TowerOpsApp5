@@ -494,7 +494,7 @@ public class ShuyunFragment extends Fragment {
                     etImgcode.setText("");
                     tvPcLoginStatus.setText("验证码错误");
                     tvPcLoginStatus.setTextColor(0xFFEF4444); // 红色
-                    appendLog("PC端登录失败: 验证码错误");
+                    appendLog("PC端登录失败，返回: " + pcLoginResult);
 
                     // 刷新验证码
                     refreshCaptcha();

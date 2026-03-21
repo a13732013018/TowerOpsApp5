@@ -83,18 +83,30 @@ public class ShuyunApi {
         CaptchaMath math = new CaptchaMath();
         try {
             JSONObject root = new JSONObject(jsonStr);
-            math.num1 = root.optInt("num1", 0);
-            math.num2 = root.optInt("num2", 0);
-            math.symbol = root.optString("symbol", "+");
-            // 计算结果
-            switch (math.symbol) {
-                case "+": math.result = math.num1 + math.num2; break;
-                case "-": math.result = math.num1 - math.num2; break;
-                case "×": math.result = math.num1 * math.num2; break;
-                case "÷": math.result = math.num2 != 0 ? math.num1 / math.num2 : 0; break;
-                default: math.result = math.num1 + math.num2;
+            
+            // 先检查这些字段是否真的存在于JSON中，而不是用默认值
+            boolean hasNum1 = root.has("num1");
+            boolean hasNum2 = root.has("num2");
+            boolean hasSymbol = root.has("symbol");
+            
+            // 只有当所有字段都存在时，才解析数学题
+            if (hasNum1 && hasNum2 && hasSymbol) {
+                math.num1 = root.getInt("num1");
+                math.num2 = root.getInt("num2");
+                math.symbol = root.getString("symbol");
+                // 计算结果
+                switch (math.symbol) {
+                    case "+": math.result = math.num1 + math.num2; break;
+                    case "-": math.result = math.num1 - math.num2; break;
+                    case "×": math.result = math.num1 * math.num2; break;
+                    case "÷": math.result = math.num2 != 0 ? math.num1 / math.num2 : 0; break;
+                    default: math.result = math.num1 + math.num2;
+                }
+                math.hasMath = true;
+            } else {
+                // 服务器没有返回数学题字段，说明是普通图形验证码
+                math.hasMath = false;
             }
-            math.hasMath = true;
         } catch (Exception e) {
             math.hasMath = false;
         }
