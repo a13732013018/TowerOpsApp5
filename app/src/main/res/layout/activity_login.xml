@@ -187,11 +187,11 @@
                         android:layout_width="110dp"
                         android:layout_height="52dp"
                         android:layout_marginStart="12dp"
-                        android:background="@drawable/bg_button_outline_primary"
+                        android:background="@drawable/bg_button_primary_gradient"
                         android:text="获取验证码"
-                        android:textSize="13sp"
+                        android:textSize="12sp"
                         android:textStyle="bold"
-                        android:textColor="@color/colorPrimary"/>
+                        android:textColor="@color/text_inverse"/>
                 </LinearLayout>
 
                 <!-- 登录按钮 -->
