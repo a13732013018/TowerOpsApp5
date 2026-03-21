@@ -6,19 +6,18 @@
     android:background="@color/background_primary">
 
     <!-- 排序工具栏 -->
-    <HorizontalScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="40dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
         android:background="@color/background_secondary"
-        android:scrollbars="none"
-        android:fillViewport="true">
+        android:padding="12dp"
+        android:elevation="2dp">
 
         <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
             android:gravity="center_vertical">
 
             <TextView
@@ -26,48 +25,62 @@
                 android:layout_height="wrap_content"
                 android:text="排序："
                 android:textColor="@color/text_secondary"
-                android:textSize="13sp"/>
+                android:textSize="14sp"
+                android:textStyle="bold"/>
 
-            <TextView
-                android:id="@+id/btnSortVoltage"
-                android:layout_width="wrap_content"
-                android:layout_height="28dp"
-                android:text="电压 ↕"
-                android:textSize="12sp"
-                android:textColor="@color/text_secondary"
-                android:background="@drawable/bg_tag_secondary"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:gravity="center"
-                android:layout_marginStart="8dp"/>
+            <HorizontalScrollView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:scrollbars="none"
+                android:layout_marginStart="8dp">
 
-            <TextView
-                android:id="@+id/btnSortLoadCurrent"
-                android:layout_width="wrap_content"
-                android:layout_height="28dp"
-                android:text="负载电流 ↕"
-                android:textSize="12sp"
-                android:textColor="@color/text_secondary"
-                android:background="@drawable/bg_tag_secondary"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:gravity="center"
-                android:layout_marginStart="8dp"/>
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal">
 
-            <TextView
-                android:id="@+id/btnSortAlarmTime"
-                android:layout_width="wrap_content"
-                android:layout_height="28dp"
-                android:text="告警时间 ↕"
-                android:textSize="12sp"
-                android:textColor="@color/text_secondary"
-                android:background="@drawable/bg_tag_secondary"
-                android:paddingStart="10dp"
-                android:paddingEnd="10dp"
-                android:gravity="center"
-                android:layout_marginStart="8dp"/>
+                    <TextView
+                        android:id="@+id/btnSortVoltage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="电压 ↕"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
+                        android:background="@drawable/bg_tag_secondary"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:gravity="center"/>
+
+                    <TextView
+                        android:id="@+id/btnSortLoadCurrent"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="负载电流 ↕"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
+                        android:background="@drawable/bg_tag_secondary"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:gravity="center"
+                        android:layout_marginStart="8dp"/>
+
+                    <TextView
+                        android:id="@+id/btnSortAlarmTime"
+                        android:layout_width="wrap_content"
+                        android:layout_height="32dp"
+                        android:text="告警时间 ↕"
+                        android:textSize="13sp"
+                        android:textColor="@color/text_secondary"
+                        android:background="@drawable/bg_tag_secondary"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:gravity="center"
+                        android:layout_marginStart="8dp"/>
+                </LinearLayout>
+            </HorizontalScrollView>
         </LinearLayout>
-    </HorizontalScrollView>
+    </LinearLayout>
 
     <!-- 分割线 -->
     <View
@@ -78,19 +91,19 @@
     <!-- 表头 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="36dp"
+        android:layout_height="42dp"
         android:orientation="horizontal"
         android:background="@color/background_tertiary"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
+        android:paddingStart="12dp"
+        android:paddingEnd="12dp"
         android:gravity="center_vertical">
 
         <TextView
-            android:layout_width="24dp"
+            android:layout_width="28dp"
             android:layout_height="wrap_content"
             android:text="#"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="13sp"
             android:gravity="center"/>
 
         <TextView
@@ -99,48 +112,59 @@
             android:layout_weight="1"
             android:text="站点名称"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            android:layout_marginStart="6dp"/>
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:layout_marginStart="8dp"/>
+
+        <TextView
+            android:layout_width="56dp"
+            android:layout_height="wrap_content"
+            android:text="电压(V)"
+            android:textColor="@color/text_secondary"
+            android:textSize="13sp"
+            android:textStyle="bold"
+            android:gravity="end"
+            android:layout_marginStart="8dp"/>
 
         <TextView
             android:layout_width="52dp"
             android:layout_height="wrap_content"
-            android:text="电压"
+            android:text="负载(A)"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="13sp"
+            android:textStyle="bold"
             android:gravity="end"
-            android:layout_marginStart="6dp"/>
+            android:layout_marginStart="8dp"/>
 
         <TextView
-            android:layout_width="48dp"
-            android:layout_height="wrap_content"
-            android:text="负载"
-            android:textColor="@color/text_secondary"
-            android:textSize="12sp"
-            android:gravity="end"
-            android:layout_marginStart="6dp"/>
-
-        <TextView
-            android:layout_width="40dp"
+            android:layout_width="44dp"
             android:layout_height="wrap_content"
             android:text="类型"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="13sp"
+            android:textStyle="bold"
             android:gravity="center"
-            android:layout_marginStart="6dp"/>
+            android:layout_marginStart="8dp"/>
 
         <TextView
-            android:layout_width="110dp"
+            android:layout_width="120dp"
             android:layout_height="wrap_content"
             android:text="告警时间"
             android:textColor="@color/text_secondary"
-            android:textSize="12sp"
+            android:textSize="13sp"
+            android:textStyle="bold"
             android:maxLines="1"
             android:ellipsize="end"
             android:gravity="center_vertical|end"
             android:includeFontPadding="false"
-            android:layout_marginStart="6dp"/>
+            android:layout_marginStart="8dp"/>
     </LinearLayout>
+
+    <!-- 分割线 -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/divider"/>
 
     <!-- 停电列表 -->
     <androidx.recyclerview.widget.RecyclerView
@@ -148,8 +172,6 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/background_primary"
-        android:clipToPadding="false"
-        android:paddingBottom="8dp"/>
+        android:background="@color/background_primary"/>
 
 </LinearLayout>

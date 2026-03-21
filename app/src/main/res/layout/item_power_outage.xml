@@ -1,26 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- 紧凑型停电列表项：白色主题版本 -->
-<!-- 列宽设置：序号24dp | 站点名称自适应 | 电压52dp | 负载48dp | 类型40dp | 告警时间110dp -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:background="@color/list_item_background"
-    android:paddingTop="10dp"
-    android:paddingBottom="10dp"
-    android:paddingStart="8dp"
-    android:paddingEnd="8dp"
+    android:paddingVertical="12dp"
+    android:paddingHorizontal="12dp"
     android:gravity="center_vertical"
-    android:layout_marginBottom="1dp">
+    android:foreground="?attr/selectableItemBackground">
 
     <!-- 序号 -->
     <TextView
         android:id="@+id/tvIndex"
-        android:layout_width="24dp"
+        android:layout_width="28dp"
         android:layout_height="wrap_content"
         android:text="1"
         android:textColor="@color/text_tertiary"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:gravity="center"/>
 
     <!-- 站点名称（自适应） -->
@@ -31,58 +27,60 @@
         android:layout_weight="1"
         android:text="站点名称"
         android:textColor="@color/text_primary"
-        android:textSize="13sp"
+        android:textSize="14sp"
         android:maxLines="1"
         android:ellipsize="end"
-        android:layout_marginStart="6dp"/>
+        android:layout_marginStart="8dp"/>
 
-    <!-- 电压（固定52dp，右对齐） -->
+    <!-- 电压 -->
     <TextView
         android:id="@+id/tvDcVoltage"
-        android:layout_width="52dp"
+        android:layout_width="56dp"
         android:layout_height="wrap_content"
         android:text="0.00V"
         android:textColor="@color/error"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:textStyle="bold"
         android:gravity="end"
-        android:layout_marginStart="6dp"/>
+        android:layout_marginStart="8dp"/>
 
-    <!-- 负载电流（固定48dp，右对齐） -->
+    <!-- 负载电流 -->
     <TextView
         android:id="@+id/tvDcLoadCurrent"
-        android:layout_width="48dp"
+        android:layout_width="52dp"
         android:layout_height="wrap_content"
         android:text="0.00A"
         android:textColor="@color/success"
-        android:textSize="12sp"
+        android:textSize="13sp"
         android:gravity="end"
-        android:layout_marginStart="6dp"/>
+        android:layout_marginStart="8dp"/>
 
-    <!-- 类型（固定40dp，居中） -->
+    <!-- 类型 -->
     <TextView
         android:id="@+id/tvCause"
-        android:layout_width="40dp"
+        android:layout_width="44dp"
         android:layout_height="wrap_content"
         android:text="停电"
         android:textColor="@color/warning"
-        android:textSize="11sp"
+        android:textSize="12sp"
         android:gravity="center"
-        android:layout_marginStart="6dp"/>
+        android:layout_marginStart="8dp"
+        android:background="@drawable/bg_tag_warning"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp"/>
 
-    <!-- 告警时间（固定110dp，右对齐，不换行） -->
+    <!-- 告警时间 -->
     <TextView
         android:id="@+id/tvAlarmTime"
-        android:layout_width="110dp"
+        android:layout_width="120dp"
         android:layout_height="wrap_content"
         android:text="时间"
         android:textColor="@color/text_secondary"
-        android:textSize="11sp"
+        android:textSize="12sp"
         android:maxLines="1"
         android:ellipsize="end"
-        android:gravity="center_vertical|end"
-        android:includeFontPadding="false"
-        android:layout_marginStart="6dp"/>
+        android:gravity="end"
+        android:layout_marginStart="8dp"/>
 
     <!-- 站点编码（隐藏） -->
     <TextView
