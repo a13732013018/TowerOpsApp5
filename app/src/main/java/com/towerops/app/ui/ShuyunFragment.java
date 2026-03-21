@@ -422,16 +422,14 @@ public class ShuyunFragment extends Fragment {
             return;
         }
 
-        appendLog("正在登录PC端(" + pcUser + ")和APP端(" + appUser + ")...");
-
         btnLogin.setEnabled(false);
         btnLogin.setText("登录中...");
 
         new Thread(() -> {
             // 获取账号信息
             // PC端和APP端使用不同的账号！
-            String pcUser = ShuyunApi.PC_USER;
-            String pcPass = ShuyunApi.PC_PASS;
+            final String pcUser = ShuyunApi.PC_USER;
+            final String pcPass = ShuyunApi.PC_PASS;
 
             String appUser, appPass, appImei;
             if (selectedAccountIndex == 1) {
@@ -443,6 +441,9 @@ public class ShuyunFragment extends Fragment {
                 appPass = ShuyunApi.DEFAULT_PASS;
                 appImei = ShuyunApi.DEFAULT_IMEI;
             }
+
+            // 在线程内记录日志
+            appendLog("正在登录PC端(" + pcUser + ")和APP端(" + appUser + ")...");
 
             // 1. PC端登录（使用PC端专用账号）
             String pcLoginResult = ShuyunApi.loginByPc(pcUser, pcPass, imgcode, currentPcIp);
