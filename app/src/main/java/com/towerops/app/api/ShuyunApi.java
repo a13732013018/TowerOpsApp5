@@ -831,9 +831,9 @@ public class ShuyunApi {
             String flowInstId, String jobId, String workInstId, String flowId, String userId) {
         String url = PC_BASE + "/api/flowable/flowable/task/complete";
 
-        // 计算nextJobAndUser：根据jobId前缀
+        // 计算nextJobAndUser：根据jobId前缀（注意：易语言源码中12120后面是中文逗号）
         String jobPrefix = jobId.contains("_") ? jobId.substring(0, jobId.indexOf("_")) : jobId;
-        String nextJobAndUser = jobPrefix + "_003@12101,12102,12104,12108,12376,22979,30264,37493,12107,37614,37881,12103,12106,12120,12101,12103";
+        String nextJobAndUser = jobPrefix + "_003@12101,12102,12104,12108,12376,22979,30264,37493,12107,37614,37881,12103,12106,12120，12101,12103";
 
         // JSON格式请求体（与易语言一致）
         String post = "{\"orderNum\":\"" + orderNum + "\","

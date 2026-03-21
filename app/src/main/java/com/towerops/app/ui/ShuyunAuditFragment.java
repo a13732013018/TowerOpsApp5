@@ -177,9 +177,6 @@ public class ShuyunAuditFragment extends Fragment {
                     mainHandler.post(() -> updateStatus("获取工单中..."));
                     String jsonStr = ShuyunApi.getCountyTaskList(pcToken, userId);
 
-                    // 调试：输出原始JSON
-                    appendLog("原始响应: " + (jsonStr.length() > 200 ? jsonStr.substring(0, 200) + "..." : jsonStr));
-
                     List<ShuyunApi.CountyTaskInfo> taskList = ShuyunApi.parseCountyTaskList(jsonStr);
 
                     if (taskList.isEmpty()) {
@@ -229,10 +226,13 @@ public class ShuyunAuditFragment extends Fragment {
                             userId
                         );
 
+                        // 输出完整审核结果用于调试
+                        appendLog("审核返回: " + (result != null ? result : "null"));
+
                         if (ShuyunApi.isSuccess(result)) {
                             appendLog("✓ 审核通过: " + task.station_name + " (" + task.orderNum + ")");
                         } else {
-                            appendLog("✗ 审核失败: " + task.station_name + ", 返回: " + result);
+                            appendLog("✗ 审核失败: " + task.station_name);
                         }
                     }
 
