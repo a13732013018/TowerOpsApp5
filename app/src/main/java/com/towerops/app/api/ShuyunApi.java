@@ -27,12 +27,18 @@ public class ShuyunApi {
     // APP版服务器
     private static final String APP_BASE = "http://223.95.77.175:19021";
 
-    // 默认账号（从用户提供的信息）
+    // ===================== PC端账号 =====================
+    // PC端账号（用于PC版网站登录）
+    public static final String PC_USER = "13566295657";
+    public static final String PC_PASS = "MLcQylxc4733Iav/cNx+oQ==";
+
+    // ===================== APP端账号 =====================
+    // APP端默认账号
     public static final String DEFAULT_USER = "13732013018";
     public static final String DEFAULT_PASS = "F8TVasxWplZNK7AJq4T1cA==";
     public static final String DEFAULT_IMEI = "ba9f03beaacd4c05";
 
-    // 备用账号
+    // APP端备用账号
     public static final String BACKUP_USER = "15858734252";
     public static final String BACKUP_PASS = "0/YBW5U6t/yAZggx3MfHCQ==";
     public static final String BACKUP_IMEI = "a873a215e542edab";
@@ -67,6 +73,43 @@ public class ShuyunApi {
             e.printStackTrace();
             return "";
         }
+    }
+
+    /**
+     * 解析验证码返回的数学运算题目（如果有）
+     * 返回格式如：{"num1": 5, "num2": 3, "symbol": "+"}
+     */
+    public static CaptchaMath parseMathCode(String jsonStr) {
+        CaptchaMath math = new CaptchaMath();
+        try {
+            JSONObject root = new JSONObject(jsonStr);
+            math.num1 = root.optInt("num1", 0);
+            math.num2 = root.optInt("num2", 0);
+            math.symbol = root.optString("symbol", "+");
+            // 计算结果
+            switch (math.symbol) {
+                case "+": math.result = math.num1 + math.num2; break;
+                case "-": math.result = math.num1 - math.num2; break;
+                case "×": math.result = math.num1 * math.num2; break;
+                case "÷": math.result = math.num2 != 0 ? math.num1 / math.num2 : 0; break;
+                default: math.result = math.num1 + math.num2;
+            }
+            math.hasMath = true;
+        } catch (Exception e) {
+            math.hasMath = false;
+        }
+        return math;
+    }
+
+    /**
+     * 验证码数学运算封装
+     */
+    public static class CaptchaMath {
+        public int num1 = 0;
+        public int num2 = 0;
+        public String symbol = "+";
+        public int result = 0;
+        public boolean hasMath = false;
     }
 
     // =====================================================================

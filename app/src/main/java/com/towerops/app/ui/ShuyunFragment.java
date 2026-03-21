@@ -104,6 +104,9 @@ public class ShuyunFragment extends Fragment {
         setupListeners();
         loadConfig();
         startTimeUpdate();
+
+        // 启动时自动加载验证码
+        refreshCaptcha();
     }
 
     private void startTimeUpdate() {
@@ -159,10 +162,10 @@ public class ShuyunFragment extends Fragment {
     }
 
     private void setupAccountSpinner() {
-        // 账号数组
+        // 账号数组 - 仅APP端账号选择（PC端使用固定账号）
         String[] accounts = new String[]{
-            "账号1: 13732013018",
-            "账号2: 15858734252"
+            "APP账号1: 13732013018",
+            "APP账号2: 15858734252"
         };
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
@@ -351,6 +354,9 @@ public class ShuyunFragment extends Fragment {
                 return;
             }
 
+            // 解析数学运算题目（如果有）
+            ShuyunApi.CaptchaMath math = ShuyunApi.parseMathCode(imgcodeResult);
+
             // 解析验证码图片（base64编码）
             try {
                 org.json.JSONObject root = new org.json.JSONObject(imgcodeResult);
@@ -364,14 +370,24 @@ public class ShuyunFragment extends Fragment {
                         Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
                         if (bitmap != null) {
                             ivCaptcha.setImageBitmap(bitmap);
-                            appendLog("验证码获取成功，请输入验证码");
-                            Toast.makeText(getContext(), "请输入验证码", Toast.LENGTH_SHORT).show();
+
+                            // 如果有数学运算题目，显示提示
+                            if (math.hasMath) {
+                                String hint = String.valueOf(math.num1) + math.symbol + String.valueOf(math.num2) + " = ?";
+                                etImgcode.setHint(hint);
+                                appendLog("验证码获取成功，请计算: " + hint);
+                                Toast.makeText(getContext(), "请计算: " + hint, Toast.LENGTH_LONG).show();
+                            } else {
+                                appendLog("验证码获取成功，请输入计算结果");
+                                Toast.makeText(getContext(), "请输入计算结果", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
                 }
             } catch (Exception e) {
                 mainHandler.post(() -> {
                     appendLog("解析验证码图片失败: " + e.getMessage());
+                    Toast.makeText(getContext(), "解析验证码失败", Toast.LENGTH_SHORT).show();
                 });
             }
         }).start();
@@ -395,40 +411,45 @@ public class ShuyunFragment extends Fragment {
                 Toast.makeText(getContext(), "请先获取并输入验证码", Toast.LENGTH_SHORT).show();
                 return;
             } else {
-                Toast.makeText(getContext(), "请输入验证码", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "请输入计算结果", Toast.LENGTH_SHORT).show();
                 return;
             }
         }
 
-        if (imgcode.length() != 4) {
-            Toast.makeText(getContext(), "请输入4位验证码", Toast.LENGTH_SHORT).show();
+        // 验证码应该是数学运算结果，允许1-6位数字
+        if (!imgcode.matches("\\d+")) {
+            Toast.makeText(getContext(), "请输入数字", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        appendLog("正在登录PC端和APP端...");
+        appendLog("正在登录PC端(" + pcUser + ")和APP端(" + appUser + ")...");
 
         btnLogin.setEnabled(false);
         btnLogin.setText("登录中...");
 
         new Thread(() -> {
             // 获取账号信息
-            String user, pass, imei;
+            // PC端和APP端使用不同的账号！
+            String pcUser = ShuyunApi.PC_USER;
+            String pcPass = ShuyunApi.PC_PASS;
+
+            String appUser, appPass, appImei;
             if (selectedAccountIndex == 1) {
-                user = ShuyunApi.BACKUP_USER;
-                pass = ShuyunApi.BACKUP_PASS;
-                imei = ShuyunApi.BACKUP_IMEI;
+                appUser = ShuyunApi.BACKUP_USER;
+                appPass = ShuyunApi.BACKUP_PASS;
+                appImei = ShuyunApi.BACKUP_IMEI;
             } else {
-                user = ShuyunApi.DEFAULT_USER;
-                pass = ShuyunApi.DEFAULT_PASS;
-                imei = ShuyunApi.DEFAULT_IMEI;
+                appUser = ShuyunApi.DEFAULT_USER;
+                appPass = ShuyunApi.DEFAULT_PASS;
+                appImei = ShuyunApi.DEFAULT_IMEI;
             }
 
-            // 1. PC端登录
-            String pcLoginResult = ShuyunApi.loginByPc(user, pass, imgcode, currentPcIp);
+            // 1. PC端登录（使用PC端专用账号）
+            String pcLoginResult = ShuyunApi.loginByPc(pcUser, pcPass, imgcode, currentPcIp);
             String pcTokenResult = ShuyunApi.parsePcToken(pcLoginResult);
 
-            // 2. APP端登录
-            String appLoginResult = ShuyunApi.loginByApp(user, pass, imei);
+            // 2. APP端登录（使用APP端账号）
+            String appLoginResult = ShuyunApi.loginByApp(appUser, appPass, appImei);
             ShuyunApi.ShuyunLoginResult appLogin = ShuyunApi.parseAppLogin(appLoginResult);
 
             // 保存到Session
