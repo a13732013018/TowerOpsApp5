@@ -226,6 +226,24 @@
             android:layout_marginStart="12dp"
             android:minHeight="0dp" />
 
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="区县"
+            android:textSize="12sp"
+            android:textColor="#666666"
+            android:layout_marginStart="12dp" />
+
+        <Spinner
+            android:id="@+id/spinnerCounty"
+            android:layout_width="80dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="4dp"
+            android:background="@drawable/bg_spinner"
+            android:paddingStart="4dp"
+            android:paddingEnd="4dp"
+            android:dropDownWidth="120dp" />
+
         <View
             android:layout_width="0dp"
             android:layout_height="0dp"

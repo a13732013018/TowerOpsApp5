@@ -54,10 +54,15 @@ public class ShuyunMonitorFragment extends Fragment {
     private View tvEmpty;
 
     // 登录控件
-    private Spinner spinnerPcAccount, spinnerAppAccount;
+    private Spinner spinnerPcAccount, spinnerAppAccount, spinnerCounty;
     private ImageView imgPcCaptcha;
     private EditText etPcCaptcha;
     private View layoutPcCaptcha;
+
+    // 区县代码（用于数运智联工单接单）
+    private static final String[] COUNTY_CODES = {"330326", "330329", "330302", "330327", "330328", "330381", "330382", "330303", "330305", "330324", "330383"};
+    private static final String[] COUNTY_NAMES = {"平阳", "泰顺", "鹿城", "苍南", "文成", "瑞安", "乐清", "龙湾", "洞头", "永嘉", "龙港"};
+    private int selectedCountyIndex = 0;
 
     // 适配器
     private ShuyunAdapter pendingAdapter;
@@ -165,6 +170,7 @@ public class ShuyunMonitorFragment extends Fragment {
 
         // 登录控件（PC账号选择器已移除）
         spinnerAppAccount = view.findViewById(R.id.spinnerAppAccount);
+        spinnerCounty = view.findViewById(R.id.spinnerCounty);
         imgPcCaptcha = view.findViewById(R.id.imgPcCaptcha);
         etPcCaptcha = view.findViewById(R.id.etPcCaptcha);
         layoutPcCaptcha = view.findViewById(R.id.layoutPcCaptcha);
@@ -220,6 +226,50 @@ public class ShuyunMonitorFragment extends Fragment {
 
         // 更新默认IMEI显示
         updateImeiDisplay(0);
+
+        // 初始化区县选择器
+        initCountySpinner();
+    }
+
+    private void initCountySpinner() {
+        // 读取保存的区县选择
+        Session s = Session.get();
+        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, COUNTY_NAMES);
+        countyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCounty.setAdapter(countyAdapter);
+
+        // 恢复保存的选择
+        if (s.countyManagerCode != null) {
+            for (int i = 0; i < COUNTY_CODES.length; i++) {
+                if (COUNTY_CODES[i].equals(s.countyManagerCode)) {
+                    spinnerCounty.setSelection(i);
+                    selectedCountyIndex = i;
+                    break;
+                }
+            }
+        }
+
+        // 区县选择事件
+        spinnerCounty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedCountyIndex = position;
+                // 保存选择到Session
+                Session s = Session.get();
+                s.countyManagerCode = COUNTY_CODES[position];
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
+    }
+
+    /**
+     * 获取当前选择的区县代码
+     */
+    public String getSelectedCountyCode() {
+        return COUNTY_CODES[selectedCountyIndex];
     }
 
     private void setupListeners() {
