@@ -363,6 +363,9 @@ public class ShuyunApi {
         ShuyunLoginResult result = new ShuyunLoginResult();
         try {
             JSONObject root = new JSONObject(jsonStr);
+            // 解析错误信息
+            result.message = root.optString("message", "");
+            // 解析data
             JSONObject data = root.optJSONObject("data");
             if (data != null) {
                 result.token = data.optString("data", "");
@@ -371,6 +374,7 @@ public class ShuyunApi {
             }
         } catch (Exception e) {
             e.printStackTrace();
+            result.message = e.getMessage();
         }
         return result;
     }
@@ -379,6 +383,7 @@ public class ShuyunApi {
         public String token = "";
         public String userId = "";
         public boolean success = false;
+        public String message = "";
     }
 
     // =====================================================================
