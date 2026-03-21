@@ -753,11 +753,12 @@ public class ShuyunFragment extends Fragment {
                         final ShuyunApi.CountyTaskInfo currentTask = task; // 创建final副本供lambda使用
 
                         // 仿生延迟：基础2-6秒
-                        int delay = (int) (Math.random() * 4000) + 2000;
+                        int delayMs = (int) (Math.random() * 4000) + 2000;
                         // 每3条额外4-8秒
                         if (i > 0 && i % 3 == 0) {
-                            delay += (int) (Math.random() * 4000) + 4000;
+                            delayMs += (int) (Math.random() * 4000) + 4000;
                         }
+                        final int delay = delayMs; // 创建final副本供lambda使用
 
                         final int currentIndex = i;
                         mainHandler.post(() -> {
