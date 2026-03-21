@@ -180,7 +180,7 @@
                         android:textSize="15sp"
                         android:paddingStart="16dp"
                         android:paddingEnd="16dp"
-                        android:inputType="textPassword"/>
+                        android:inputType="text"/>
 
                     <Button
                         android:id="@+id/btnGetSms"

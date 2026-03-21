@@ -91,19 +91,19 @@
     <!-- 表头 -->
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="38dp"
+        android:layout_height="36dp"
         android:orientation="horizontal"
         android:background="@color/background_tertiary"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp"
+        android:paddingStart="8dp"
+        android:paddingEnd="8dp"
         android:gravity="center_vertical">
 
         <TextView
-            android:layout_width="24dp"
+            android:layout_width="22dp"
             android:layout_height="wrap_content"
             android:text="#"
             android:textColor="@color/text_secondary"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:gravity="center"/>
 
         <TextView
@@ -112,52 +112,52 @@
             android:layout_weight="1"
             android:text="站点名称"
             android:textColor="@color/text_secondary"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:layout_marginStart="6dp"/>
+            android:layout_marginStart="4dp"/>
 
         <TextView
-            android:layout_width="46dp"
+            android:layout_width="42dp"
             android:layout_height="wrap_content"
             android:text="电压(V)"
             android:textColor="@color/text_secondary"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:gravity="end"
-            android:layout_marginStart="6dp"/>
-
-        <TextView
-            android:layout_width="44dp"
-            android:layout_height="wrap_content"
-            android:text="负载(A)"
-            android:textColor="@color/text_secondary"
-            android:textSize="11sp"
-            android:textStyle="bold"
-            android:gravity="end"
-            android:layout_marginStart="6dp"/>
+            android:layout_marginStart="4dp"/>
 
         <TextView
             android:layout_width="40dp"
             android:layout_height="wrap_content"
-            android:text="类型"
+            android:text="负载(A)"
             android:textColor="@color/text_secondary"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold"
-            android:gravity="center"
-            android:layout_marginStart="6dp"/>
+            android:gravity="end"
+            android:layout_marginStart="4dp"/>
 
         <TextView
-            android:layout_width="80dp"
+            android:layout_width="36dp"
+            android:layout_height="wrap_content"
+            android:text="类型"
+            android:textColor="@color/text_secondary"
+            android:textSize="10sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginStart="4dp"/>
+
+        <TextView
+            android:layout_width="70dp"
             android:layout_height="wrap_content"
             android:text="告警时间"
             android:textColor="@color/text_secondary"
-            android:textSize="11sp"
+            android:textSize="10sp"
             android:textStyle="bold"
             android:maxLines="1"
             android:ellipsize="end"
             android:gravity="center_vertical|end"
             android:includeFontPadding="false"
-            android:layout_marginStart="6dp"/>
+            android:layout_marginStart="4dp"/>
     </LinearLayout>
 
     <!-- 分割线 -->
