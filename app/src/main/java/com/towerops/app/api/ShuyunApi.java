@@ -65,39 +65,6 @@ public class ShuyunApi {
     }
 
     /**
-     * 获取验证码图片（返回Bitmap和IP）
-     * @return CaptchaResult包含image和ip
-     */
-    public static CaptchaResult getCaptcha() {
-        CaptchaResult result = new CaptchaResult();
-        try {
-            // 先获取IP
-            String jsonStr = getImgcode();
-            result.ip = parseIp(jsonStr);
-
-            // 如果有IP，获取验证码图片
-            if (!result.ip.isEmpty()) {
-                String imgUrl = "http://" + result.ip + "/api/auth/jwt/getImgcode?rand=" + System.currentTimeMillis();
-                byte[] imageBytes = HttpUtil.getBytes(imgUrl);
-                if (imageBytes != null && imageBytes.length > 0) {
-                    result.image = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.length);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return result;
-    }
-
-    /**
-     * 验证码结果封装
-     */
-    public static class CaptchaResult {
-        public Bitmap image = null;
-        public String ip = "";
-    }
-
-    /**
      * 解析验证码返回的IP
      */
     public static String parseIp(String jsonStr) {
