@@ -6,10 +6,15 @@ import android.os.Looper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ScrollView;
 import android.widget.Spinner;
@@ -44,13 +49,18 @@ public class ShuyunFragment extends Fragment {
     private TextView tvShuyunStatus, tvPendingCount, tvProcessingCount, tvLog, tvCurrentTime, tvLoginStatus;
     private TextView tvPcLoginStatus, tvAppLoginStatus;
     private CheckBox cbAutoAccept, cbAutoRevert;
-    private Button btnStartShuyun, btnStopShuyun, btnLogin;
-    private ImageView ivAutoAcceptInfo, ivAutoRevertInfo;
+    private Button btnStartShuyun, btnStopShuyun, btnLogin, btnRefreshCaptcha;
+    private ImageView ivAutoAcceptInfo, ivAutoRevertInfo, ivCaptcha;
+    private EditText etImgcode;
     private TabLayout tabLayoutShuyun;
     private RecyclerView rvPending, rvProcessing;
     private ScrollView svLog;
     private View tvEmpty;
     private Spinner spinnerAccount;
+
+    // 验证码相关
+    private String currentPcIp = "";
+    private byte[] captchaImageBytes = null;
 
     // 适配器
     private ShuyunAdapter pendingAdapter;
@@ -143,6 +153,9 @@ public class ShuyunFragment extends Fragment {
         tvPcLoginStatus = view.findViewById(R.id.tvPcLoginStatus);
         tvAppLoginStatus = view.findViewById(R.id.tvAppLoginStatus);
         spinnerAccount = view.findViewById(R.id.spinnerAccount);
+        ivCaptcha = view.findViewById(R.id.ivCaptcha);
+        etImgcode = view.findViewById(R.id.etImgcode);
+        btnRefreshCaptcha = view.findViewById(R.id.btnRefreshCaptcha);
     }
 
     private void setupAccountSpinner() {
@@ -210,6 +223,9 @@ public class ShuyunFragment extends Fragment {
     }
 
     private void setupListeners() {
+        // 刷新验证码按钮
+        btnRefreshCaptcha.setOnClickListener(v -> refreshCaptcha());
+
         // 登录按钮
         btnLogin.setOnClickListener(v -> doLogin());
 
@@ -317,71 +333,163 @@ public class ShuyunFragment extends Fragment {
     }
 
     /**
+     * 刷新验证码图片
+     */
+    private void refreshCaptcha() {
+        appendLog("正在获取验证码...");
+
+        new Thread(() -> {
+            // 获取验证码图片
+            String imgcodeResult = ShuyunApi.getImgcode();
+            currentPcIp = ShuyunApi.parseIp(imgcodeResult);
+
+            if (currentPcIp.isEmpty()) {
+                mainHandler.post(() -> {
+                    Toast.makeText(getContext(), "获取验证码失败", Toast.LENGTH_SHORT).show();
+                    appendLog("获取验证码失败");
+                });
+                return;
+            }
+
+            // 解析验证码图片（base64编码）
+            try {
+                org.json.JSONObject root = new org.json.JSONObject(imgcodeResult);
+                String imageBase64 = root.optString("image", "");
+                if (!imageBase64.isEmpty()) {
+                    // 解码base64图片
+                    byte[] decodedBytes = android.util.Base64.decode(imageBase64, android.util.Base64.DEFAULT);
+                    captchaImageBytes = decodedBytes;
+
+                    mainHandler.post(() -> {
+                        Bitmap bitmap = BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
+                        if (bitmap != null) {
+                            ivCaptcha.setImageBitmap(bitmap);
+                            appendLog("验证码获取成功，请输入验证码");
+                            Toast.makeText(getContext(), "请输入验证码", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            } catch (Exception e) {
+                mainHandler.post(() -> {
+                    appendLog("解析验证码图片失败: " + e.getMessage());
+                });
+            }
+        }).start();
+    }
+
+    /**
      * 执行登录 - 同时登录PC端和APP端
      */
     private void doLogin() {
-        if (isAppLoggedIn) {
-            Toast.makeText(getContext(), "已登录，请勿重复登录", Toast.LENGTH_SHORT).show();
+        if (isAppLoggedIn && isPcLoggedIn) {
+            Toast.makeText(getContext(), "已全部登录完成", Toast.LENGTH_SHORT).show();
             return;
         }
 
-        appendLog("正在同时登录PC端和APP端，使用账号" + (selectedAccountIndex + 1) + "...");
+        // 检查验证码
+        String imgcode = etImgcode.getText().toString().trim();
+        if (imgcode.isEmpty()) {
+            // 如果还没有验证码IP，先获取验证码
+            if (currentPcIp.isEmpty()) {
+                refreshCaptcha();
+                Toast.makeText(getContext(), "请先获取并输入验证码", Toast.LENGTH_SHORT).show();
+                return;
+            } else {
+                Toast.makeText(getContext(), "请输入验证码", Toast.LENGTH_SHORT).show();
+                return;
+            }
+        }
+
+        if (imgcode.length() != 4) {
+            Toast.makeText(getContext(), "请输入4位验证码", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        appendLog("正在登录PC端和APP端...");
 
         btnLogin.setEnabled(false);
         btnLogin.setText("登录中...");
 
         new Thread(() -> {
-            // 同时登录PC端和APP端
-            ShuyunApi.ShuyunDualLoginResult result = ShuyunApi.loginDual(selectedAccountIndex);
+            // 获取账号信息
+            String user, pass, imei;
+            if (selectedAccountIndex == 1) {
+                user = ShuyunApi.BACKUP_USER;
+                pass = ShuyunApi.BACKUP_PASS;
+                imei = ShuyunApi.BACKUP_IMEI;
+            } else {
+                user = ShuyunApi.DEFAULT_USER;
+                pass = ShuyunApi.DEFAULT_PASS;
+                imei = ShuyunApi.DEFAULT_IMEI;
+            }
+
+            // 1. PC端登录
+            String pcLoginResult = ShuyunApi.loginByPc(user, pass, imgcode, currentPcIp);
+            String pcTokenResult = ShuyunApi.parsePcToken(pcLoginResult);
+
+            // 2. APP端登录
+            String appLoginResult = ShuyunApi.loginByApp(user, pass, imei);
+            ShuyunApi.ShuyunLoginResult appLogin = ShuyunApi.parseAppLogin(appLoginResult);
 
             // 保存到Session
             Session s = Session.get();
-            s.shuyunAppToken = result.appToken;
-            s.shuyunAppUserId = result.appUserId;
-            s.shuyunPcToken = result.pcToken;
-            s.shuyunPcIp = result.pcIp;
+            s.shuyunAppToken = appLogin.success ? appLogin.token : "";
+            s.shuyunAppUserId = appLogin.success ? appLogin.userId : "";
+            s.shuyunPcToken = pcTokenResult;
+            s.shuyunPcIp = currentPcIp;
 
             mainHandler.post(() -> {
                 // 更新APP端状态
-                if (result.appLoginSuccess) {
-                    appToken = result.appToken;
-                    appUserId = result.appUserId;
+                if (appLogin.success) {
+                    appToken = appLogin.token;
+                    appUserId = appLogin.userId;
                     isAppLoggedIn = true;
                     tvAppLoginStatus.setText("已登录");
                     tvAppLoginStatus.setTextColor(0xFF10B981); // 绿色
-                    appendLog("APP端登录成功！Token: " + result.appToken.substring(0, Math.min(15, result.appToken.length())) + "...");
+                    appendLog("APP端登录成功！Token: " + appLogin.token.substring(0, Math.min(15, appLogin.token.length())) + "...");
                 } else {
                     tvAppLoginStatus.setText("登录失败");
                     tvAppLoginStatus.setTextColor(0xFFEF4444); // 红色
-                    appendLog("APP端登录失败: " + result.errorMsg);
+                    appendLog("APP端登录失败");
                 }
 
                 // 更新PC端状态
-                if (result.pcLoginSuccess) {
-                    pcToken = result.pcToken;
+                if (!pcTokenResult.isEmpty()) {
+                    pcToken = pcTokenResult;
                     isPcLoggedIn = true;
                     tvPcLoginStatus.setText("已登录");
                     tvPcLoginStatus.setTextColor(0xFF10B981); // 绿色
-                    appendLog("PC端登录成功！Token: " + result.pcToken.substring(0, Math.min(15, result.pcToken.length())) + "...");
+                    appendLog("PC端登录成功！Token: " + pcTokenResult.substring(0, Math.min(15, pcTokenResult.length())) + "...");
                 } else {
-                    tvPcLoginStatus.setText("未登录(需验证码)");
-                    tvPcLoginStatus.setTextColor(0xFFF59E0B); // 橙色
-                    appendLog("PC端登录: " + (result.pcToken.isEmpty() ? "需要图形验证码" : result.pcToken));
+                    // 验证码错误，清空输入框，让用户重新输入
+                    etImgcode.setText("");
+                    tvPcLoginStatus.setText("验证码错误");
+                    tvPcLoginStatus.setTextColor(0xFFEF4444); // 红色
+                    appendLog("PC端登录失败: 验证码错误");
+
+                    // 刷新验证码
+                    refreshCaptcha();
                 }
 
                 // 更新整体状态
-                if (isAppLoggedIn) {
+                if (isAppLoggedIn && isPcLoggedIn) {
                     btnLogin.setEnabled(false);
                     btnLogin.setText("已登录");
                     tvLoginStatus.setText("已登录");
                     tvLoginStatus.setTextColor(0xFF10B981); // 绿色
-                    Toast.makeText(getContext(), "APP端登录成功", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "PC端和APP端登录成功！", Toast.LENGTH_SHORT).show();
+                } else if (isAppLoggedIn) {
+                    btnLogin.setEnabled(true);
+                    btnLogin.setText("重新登录PC");
+                    tvLoginStatus.setText("PC端待登录");
+                    tvLoginStatus.setTextColor(0xFFF59E0B); // 橙色
+                    Toast.makeText(getContext(), "APP端登录成功，PC端需重新输入验证码", Toast.LENGTH_SHORT).show();
                 } else {
                     btnLogin.setEnabled(true);
                     btnLogin.setText("重新登录");
                     tvLoginStatus.setText("登录失败");
                     tvLoginStatus.setTextColor(0xFFEF4444); // 红色
-                    Toast.makeText(getContext(), "APP端登录失败: " + result.errorMsg, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "登录失败，请重试", Toast.LENGTH_SHORT).show();
                 }
             });
         }).start();

@@ -97,7 +97,59 @@
                 android:layout_marginStart="8dp" />
         </LinearLayout>
 
-        <!-- 第二行：PC端和APP端登录状态 -->
+        <!-- 第二行：验证码输入（PC端需要） -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="8dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="验证码:"
+                android:textSize="12sp"
+                android:textColor="#666666" />
+
+            <EditText
+                android:id="@+id/etImgcode"
+                android:layout_width="80dp"
+                android:layout_height="36dp"
+                android:layout_marginStart="8dp"
+                android:background="@drawable/bg_edittext"
+                android:hint="4位验证码"
+                android:textSize="13sp"
+                android:textColor="#333333"
+                android:gravity="center"
+                android:inputType="text"
+                android:maxLength="4"
+                android:padding="6dp" />
+
+            <ImageView
+                android:id="@+id/ivCaptcha"
+                android:layout_width="80dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:background="#F3F4F6"
+                android:scaleType="fitCenter"
+                android:padding="2dp"
+                android:src="@android:drawable/ic_menu_gallery" />
+
+            <Button
+                android:id="@+id/btnRefreshCaptcha"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:layout_marginStart="8dp"
+                android:text="刷新"
+                android:textSize="11sp"
+                android:backgroundTint="#6B7280"
+                android:textColor="@android:color/white"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp" />
+        </LinearLayout>
+
+        <!-- 第三行：PC端和APP端登录状态 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
