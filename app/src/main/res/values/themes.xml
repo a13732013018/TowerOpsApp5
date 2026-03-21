@@ -11,7 +11,7 @@
     </style>
 
     <!-- Tab文字样式 -->
-    <style name="TabTextStyle" parent="TextAppearance.MaterialComponents.Tab">
+    <style name="TabTextStyle" parent="TextAppearance.MaterialComponents.TabText">
         <item name="android:textSize">13sp</item>
         <item name="android:textColor">#6B7280</item>
         <item name="android:textStyle">bold</item>
