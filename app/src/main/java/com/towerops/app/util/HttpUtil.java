@@ -80,6 +80,56 @@ public class HttpUtil {
     }
 
     /**
+     * GET 请求，返回响应体字符串
+     */
+    public static String get(String url, String headers, String cookie) {
+        try {
+            Request.Builder builder = new Request.Builder()
+                    .url(url.trim())
+                    .get();
+
+            // 默认协议头
+            builder.header("User-Agent", "okhttp/4.10.0");
+            builder.header("Connection", "Keep-Alive");
+
+            // 附加 cookie
+            if (cookie != null && !cookie.isEmpty()) {
+                builder.header("Cookie", cookie);
+            }
+
+            // 解析自定义协议头（换行分隔，格式 "Key: Value"）
+            if (headers != null && !headers.isEmpty()) {
+                String[] lines = headers.split("\n");
+                for (String line : lines) {
+                    int idx = line.indexOf(": ");
+                    if (idx > 0) {
+                        String key = line.substring(0, idx).trim();
+                        String val = line.substring(idx + 2).trim();
+                        builder.header(key, val);
+                    }
+                }
+            }
+
+            Request request = builder.build();
+            try (Response response = CLIENT.newCall(request).execute()) {
+                if (response.body() != null) {
+                    return response.body().string();
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    /**
+     * GET 请求（无自定义头和cookie）
+     */
+    public static String get(String url) {
+        return get(url, null, null);
+    }
+
+    /**
      * GET 请求，返回字节数组（用于图片等二进制内容）
      * 同时会自动将响应的 Set-Cookie 存入 CookieStore
      */
