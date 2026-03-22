@@ -631,13 +631,22 @@ public class ShuyunAuditFragment extends Fragment {
         String cityAreaCode = CITY_AREA_CODES[selectedCityAreaIndex];
 
         // 【核心】根据易语言逻辑：直接用32269获取待办工单（limit=10）
-        appendLog("正在获取省级待审核工单... 区域: " + CITY_AREA_NAMES[selectedCityAreaIndex]);
+        appendLog("正在获取省级待审核工单... 区域: " + CITY_AREA_NAMES[selectedCityAreaIndex] + "(" + cityAreaCode + ")");
+        appendLog("Token: " + (pcToken.length() > 20 ? pcToken.substring(0, 20) + "..." : pcToken));
+        
         String jsonStr = ShuyunApi.getProvinceTaskList(pcToken, cityAreaCode);
         
         // 调试日志：输出原始返回
-        appendLog("省级待办返回: " + (jsonStr.length() > 200 ? jsonStr.substring(0, 200) + "..." : jsonStr));
+        if (jsonStr == null || jsonStr.isEmpty()) {
+            appendLog("省级待办返回: [空]");
+            appendLog("可能原因: token失效、网络错误、服务器返回空");
+        } else {
+            appendLog("省级待办返回长度: " + jsonStr.length());
+            appendLog("省级待办返回: " + (jsonStr.length() > 300 ? jsonStr.substring(0, 300) + "..." : jsonStr));
+        }
         
         List<ShuyunApi.CountyTaskInfo> taskList = ShuyunApi.parseCountyTaskList(jsonStr);
+        appendLog("解析后工单数量: " + taskList.size());
 
         if (taskList.isEmpty()) {
             Toast.makeText(getContext(), "省级待审核工单为空", Toast.LENGTH_SHORT).show();
