@@ -209,9 +209,9 @@ public class ShuyunAuditFragment extends Fragment {
                     if (taskList.isEmpty()) {
                         appendLog("待审核工单为空");
                         mainHandler.post(() -> updateStatus("待审: 0"));
-                        // 等待下次检查（45-105秒随机）
+                        // 等待下次检查（45-105秒随机），显示倒计时
                         int sleepTime = (int) (Math.random() * 60000) + 45000;
-                        Thread.sleep(sleepTime);
+                        showCountdown("等待下次: ", sleepTime);
                         continue;
                     }
 
@@ -266,12 +266,7 @@ public class ShuyunAuditFragment extends Fragment {
                     // 本轮审核完成，等待下一轮
                     if (isCountyRunning) {
                         int sleepTime = (int) (Math.random() * 60000) + 45000;
-                        // 计算下次执行时间
-                        long nextRunTime = System.currentTimeMillis() + sleepTime;
-                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-                        String nextTimeStr = sdf.format(new Date(nextRunTime));
-                        appendLog("下次: " + nextTimeStr + " (" + sleepTime / 1000 + "秒)");
-                        Thread.sleep(sleepTime);
+                        showCountdown("下次: ", sleepTime);
                     }
 
                 } catch (InterruptedException e) {
@@ -369,9 +364,9 @@ public class ShuyunAuditFragment extends Fragment {
                             // 忽略
                         }
 
-                        // 等待下次检查（50-100秒随机）
+                        // 等待下次检查（50-100秒随机），显示倒计时
                         int sleepTime = (int) (Math.random() * 50000) + 50000;
-                        Thread.sleep(sleepTime);
+                        showCountdown("等待下次: ", sleepTime);
                         continue;
                     }
 
@@ -461,12 +456,7 @@ public class ShuyunAuditFragment extends Fragment {
                         updateCityFinishedList(finishedList);
 
                         int sleepTime = (int) (Math.random() * 50000) + 50000;
-                        // 计算下次执行时间
-                        long nextRunTime = System.currentTimeMillis() + sleepTime;
-                        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-                        String nextTimeStr = sdf.format(new Date(nextRunTime));
-                        appendLog("下次: " + nextTimeStr + " (" + sleepTime / 1000 + "秒)");
-                        Thread.sleep(sleepTime);
+                        showCountdown("下次: ", sleepTime);
                     }
 
                 } catch (InterruptedException e) {
@@ -534,6 +524,41 @@ public class ShuyunAuditFragment extends Fragment {
             tvAuditLog.setText(log + "\n[" + time + "] " + msg);
             svAuditLog.post(() -> svAuditLog.fullScroll(View.FOCUS_DOWN));
         });
+    }
+
+    /**
+     * 显示倒计时（等待期间实时显示剩余秒数）
+     * @param prefix 日志前缀
+     * @param totalMs 总等待毫秒数
+     */
+    private void showCountdown(String prefix, int totalMs) {
+        final int[] remainingSecs = {totalMs / 1000};
+        // 立即显示第一条
+        mainHandler.post(() -> updateStatus(prefix + remainingSecs[0] + "秒"));
+        appendLog(prefix + remainingSecs[0] + "秒");
+
+        // 每秒更新一次
+        final Runnable[] countdownRunnable = {null};
+        countdownRunnable[0] = new Runnable() {
+            @Override
+            public void run() {
+                if (remainingSecs[0] > 0) {
+                    remainingSecs[0]--;
+                    mainHandler.post(() -> updateStatus(prefix + remainingSecs[0] + "秒"));
+                    mainHandler.postDelayed(this, 1000);
+                }
+            }
+        };
+        mainHandler.postDelayed(countdownRunnable[0], 1000);
+
+        // 等待总时间
+        try {
+            Thread.sleep(totalMs);
+        } catch (InterruptedException e) {
+            // 被中断时清理
+        }
+        // 取消倒计时更新
+        mainHandler.removeCallbacks(countdownRunnable[0]);
     }
 
     @Override
