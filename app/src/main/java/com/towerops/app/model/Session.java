@@ -77,9 +77,15 @@ public class Session {
     public volatile String shuyunAppImei = "";
 
     /**
-     * 数运PC端登录token
+     * 数运PC端登录token（用于 Authorization）
      */
     public volatile String shuyunPcToken = "";
+
+    /**
+     * 数运PC端登录token（用于 Cookie 中的 towerNumber-Token）
+     * 【核心】可能与 shuyunPcToken 不同，来自登录响应的 Set-Cookie
+     */
+    public volatile String shuyunPcTokenCookie = "";
 
     /**
      * 数运PC端登录IP（用于验证）
@@ -122,6 +128,7 @@ public class Session {
     private static final String KEY_SHUYUN_APP_USERID = "shuyun_app_userid";
     private static final String KEY_SHUYUN_APP_IMEI = "shuyun_app_imei";
     private static final String KEY_SHUYUN_PC_TOKEN = "shuyun_pc_token";
+    private static final String KEY_SHUYUN_PC_TOKEN_COOKIE = "shuyun_pc_token_cookie";
     private static final String KEY_SHUYUN_PC_IP = "shuyun_pc_ip";
     private static final String KEY_SHUYUN_CITY_AREA = "shuyun_city_area";
     private static final String KEY_COUNTY_MANAGER_CODE = "county_manager_code";
@@ -167,6 +174,7 @@ public class Session {
            .putString(KEY_SHUYUN_APP_USERID, shuyunAppUserId)
            .putString(KEY_SHUYUN_APP_IMEI, shuyunAppImei)
            .putString(KEY_SHUYUN_PC_TOKEN, shuyunPcToken)
+           .putString(KEY_SHUYUN_PC_TOKEN_COOKIE, shuyunPcTokenCookie)
            .putString(KEY_SHUYUN_PC_IP, shuyunPcIp)
            .putString(KEY_SHUYUN_CITY_AREA, shuyunCityArea)
            .putString(KEY_COUNTY_MANAGER_CODE, countyManagerCode)
@@ -207,6 +215,7 @@ public class Session {
         String savedShuyunPcToken = sp.getString(KEY_SHUYUN_PC_TOKEN, "");
         if (!savedShuyunPcToken.isEmpty()) {
             shuyunPcToken = savedShuyunPcToken;
+            shuyunPcTokenCookie = sp.getString(KEY_SHUYUN_PC_TOKEN_COOKIE, shuyunPcToken);
             shuyunPcIp = sp.getString(KEY_SHUYUN_PC_IP, shuyunPcIp);
         }
 

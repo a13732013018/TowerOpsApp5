@@ -243,6 +243,65 @@ public class ShuyunApi {
         }
     }
 
+    /**
+     * PC版登录结果封装（包含token和cookie）
+     */
+    public static class PcLoginResult {
+        public String token = "";        // Authorization 使用的 token
+        public String cookieToken = "";  // Cookie 中 towerNumber-Token 的值
+        public boolean success = false;
+    }
+
+    /**
+     * 解析PC版登录返回的完整结果（包括token和cookie）
+     * 【核心】Authorization 和 towerNumber-Token 可能不同
+     */
+    public static PcLoginResult parsePcLoginResult(String jsonStr, String setCookieHeader) {
+        PcLoginResult result = new PcLoginResult();
+        try {
+            // 1. 从 JSON 中获取 token（用于 Authorization）
+            JSONObject root = new JSONObject(jsonStr);
+            result.token = root.optString("data", "");
+            
+            // 2. 从 Set-Cookie 中提取 towerNumber-Token（用于 Cookie）
+            if (setCookieHeader != null && !setCookieHeader.isEmpty()) {
+                result.cookieToken = extractTowerNumberToken(setCookieHeader);
+            }
+            
+            // 如果 cookieToken 为空，使用 token 作为备选
+            if (result.cookieToken.isEmpty()) {
+                result.cookieToken = result.token;
+            }
+            
+            result.success = !result.token.isEmpty();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return result;
+    }
+
+    /**
+     * 从 Set-Cookie 头中提取 towerNumber-Token
+     */
+    private static String extractTowerNumberToken(String setCookieHeader) {
+        if (setCookieHeader == null || setCookieHeader.isEmpty()) {
+            return "";
+        }
+        try {
+            // 按分号分割多个 cookie
+            String[] cookies = setCookieHeader.split(";");
+            for (String cookie : cookies) {
+                cookie = cookie.trim();
+                if (cookie.startsWith("towerNumber-Token=")) {
+                    return cookie.substring("towerNumber-Token=".length());
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
     // =====================================================================
     // 3. 同时登录PC端和APP端
     // =====================================================================
@@ -604,24 +663,27 @@ public class ShuyunApi {
 
     /**
      * 县级/市级审核 form-urlencoded POST请求头（用于获取列表，对应易语言的数运协议头）
-     * 【修正】Cookie 格式与浏览器一致
+     * 【核心】Authorization 和 Cookie 中的 towerNumber-Token 可能不同
+     * @param authToken 用于 Authorization 的 token（当前登录获取的）
+     * @param cookieToken 用于 Cookie 中 towerNumber-Token 的值（可能来自之前登录的 Set-Cookie）
      */
-    private static String buildCountyApiHeader(String pcToken) {
+    private static String buildCountyApiHeader(String authToken, String cookieToken) {
         // 【调试】打印token前20字符用于确认
-        System.out.println("[ShuyunApi] buildCountyApiHeader token: " + (pcToken != null && pcToken.length() > 20 ? pcToken.substring(0, 20) + "..." : pcToken));
+        System.out.println("[ShuyunApi] buildCountyApiHeader authToken: " + (authToken != null && authToken.length() > 20 ? authToken.substring(0, 20) + "..." : authToken));
+        System.out.println("[ShuyunApi] buildCountyApiHeader cookieToken: " + (cookieToken != null && cookieToken.length() > 20 ? cookieToken.substring(0, 20) + "..." : cookieToken));
         
-        // 【核心】Cookie 与浏览器一致，towerNumber-Token 使用 pcToken
+        // 【核心】Cookie 与浏览器一致，towerNumber-Token 使用 cookieToken（可能与 authToken 不同）
         String cookie = "SECKEY_ABVK=qeTsXE4y14X4ldH40SSQ0knt0W26i4ypYTlvXF67HHk%3D; "
                 + "BMAP_SECKEY=EoXHAf-lWPqVbjSv7_4j3cQvzlEFHd7SlUSefjm50pgPvz1UqmUf_LytsQlxN5IIAmV9_J9BF1WQIi-cBbxfyrULQHvuzq1J1hHzvHTweKWcFqtisDX98VY2MG-9NaVx2TOhX_IhsFrMPk9ZeqD9BFoUHztloIcOHcK3YkM97zwnbWwajm05accu9pXnwKKW; "
                 + "sysName=%E4%BC%8A%E4%B8%96%E8%B1%AA; "
                 + "SameSite=Lax; "
                 + "Secure; "
-                + "towerNumber-Token=" + pcToken;
+                + "towerNumber-Token=" + (cookieToken != null && !cookieToken.isEmpty() ? cookieToken : authToken);
         
         return "Accept: application/json, text/plain, */*\n"
                 + "Accept-Encoding: gzip, deflate\n"
                 + "Accept-Language: zh-CN,zh;q=0.9\n"
-                + "Authorization: " + pcToken + "\n"
+                + "Authorization: " + authToken + "\n"
                 + "Cache-Control: no-cache\n"
                 + "Connection: keep-alive\n"
                 + "Content-Type: application/x-www-form-urlencoded\n"
@@ -634,25 +696,35 @@ public class ShuyunApi {
     }
 
     /**
-     * 县级/市级审核 JSON POST请求头（用于提交审核）
-     * 【修正】Cookie 格式与浏览器一致
+     * 县级/市级审核 form-urlencoded POST请求头（兼容旧版本，使用同一个token）
      */
-    private static String buildCountyJsonHeader(String pcToken) {
+    private static String buildCountyApiHeader(String pcToken) {
+        return buildCountyApiHeader(pcToken, pcToken);
+    }
+
+    /**
+     * 县级/市级审核 JSON POST请求头（用于提交审核）
+     * 【核心】Authorization 和 Cookie 中的 towerNumber-Token 可能不同
+     * @param authToken 用于 Authorization 的 token（当前登录获取的）
+     * @param cookieToken 用于 Cookie 中 towerNumber-Token 的值（可能来自之前登录的 Set-Cookie）
+     */
+    private static String buildCountyJsonHeader(String authToken, String cookieToken) {
         // 【调试】打印token前20字符用于确认
-        System.out.println("[ShuyunApi] buildCountyJsonHeader token: " + (pcToken != null && pcToken.length() > 20 ? pcToken.substring(0, 20) + "..." : pcToken));
+        System.out.println("[ShuyunApi] buildCountyJsonHeader authToken: " + (authToken != null && authToken.length() > 20 ? authToken.substring(0, 20) + "..." : authToken));
+        System.out.println("[ShuyunApi] buildCountyJsonHeader cookieToken: " + (cookieToken != null && cookieToken.length() > 20 ? cookieToken.substring(0, 20) + "..." : cookieToken));
         
-        // 【核心】Cookie 与浏览器一致，towerNumber-Token 使用 pcToken
+        // 【核心】Cookie 与浏览器一致，towerNumber-Token 使用 cookieToken（可能与 authToken 不同）
         String cookie = "SECKEY_ABVK=qeTsXE4y14X4ldH40SSQ0knt0W26i4ypYTlvXF67HHk%3D; "
                 + "BMAP_SECKEY=EoXHAf-lWPqVbjSv7_4j3cQvzlEFHd7SlUSefjm50pgPvz1UqmUf_LytsQlxN5IIAmV9_J9BF1WQIi-cBbxfyrULQHvuzq1J1hHzvHTweKWcFqtisDX98VY2MG-9NaVx2TOhX_IhsFrMPk9ZeqD9BFoUHztloIcOHcK3YkM97zwnbWwajm05accu9pXnwKKW; "
                 + "sysName=%E4%BC%8A%E4%B8%96%E8%B1%AA; "
                 + "SameSite=Lax; "
                 + "Secure; "
-                + "towerNumber-Token=" + pcToken;
+                + "towerNumber-Token=" + (cookieToken != null && !cookieToken.isEmpty() ? cookieToken : authToken);
         
         return "Accept: application/json, text/plain, */*\n"
                 + "Accept-Encoding: gzip, deflate\n"
                 + "Accept-Language: zh-CN,zh;q=0.9\n"
-                + "Authorization: " + pcToken + "\n"
+                + "Authorization: " + authToken + "\n"
                 + "Cache-Control: no-cache\n"
                 + "Connection: keep-alive\n"
                 + "Content-Type: application/json;charset=UTF-8\n"
@@ -662,6 +734,13 @@ public class ShuyunApi {
                 + "Pragma: no-cache\n"
                 + "Referer: http://zjtowercom.cn:8998/dashboard\n"
                 + "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36";
+    }
+
+    /**
+     * 县级/市级审核 JSON POST请求头（兼容旧版本，使用同一个token）
+     */
+    private static String buildCountyJsonHeader(String pcToken) {
+        return buildCountyJsonHeader(pcToken, pcToken);
     }
 
     private static String buildAppLoginHeader() {
