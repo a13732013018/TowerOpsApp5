@@ -67,11 +67,20 @@ public class HttpUtil {
 
             Request request = builder.build();
             try (Response response = CLIENT.newCall(request).execute()) {
+                int code = response.code();
+                String respBody = "";
                 if (response.body() != null) {
-                    return response.body().string();
+                    respBody = response.body().string();
                 }
+                // 记录详细日志
+                System.out.println("[HttpUtil] POST " + url + " -> " + code);
+                if (code < 200 || code >= 300) {
+                    System.err.println("[HttpUtil] Error response: " + code + " body: " + respBody);
+                }
+                return respBody;
             }
         } catch (Exception e) {
+            System.err.println("[HttpUtil] POST Exception: " + e.getClass().getSimpleName() + " - " + e.getMessage());
             e.printStackTrace();
         }
         return "";

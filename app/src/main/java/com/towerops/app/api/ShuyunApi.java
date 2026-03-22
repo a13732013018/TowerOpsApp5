@@ -947,10 +947,18 @@ public class ShuyunApi {
                 + "&flowId=&orderType=&xmlx=&area=330300&cityArea=" + cityArea;
 
         String headers = buildCountyApiHeader(pcToken);
+        
+        // 调试日志
+        System.out.println("[ShuyunApi] getProvinceTaskList URL: " + url);
+        System.out.println("[ShuyunApi] getProvinceTaskList POST: " + post);
+        System.out.println("[ShuyunApi] getProvinceTaskList Headers: " + headers.replace(pcToken, pcToken.substring(0, 20) + "..."));
+        
         try {
             String result = HttpUtil.post(url, post, headers, null);
+            System.out.println("[ShuyunApi] getProvinceTaskList Result length: " + (result != null ? result.length() : 0));
             return result != null ? result : "";
         } catch (Exception e) {
+            System.err.println("[ShuyunApi] getProvinceTaskList Exception: " + e.getMessage());
             e.printStackTrace();
             return "";
         }
