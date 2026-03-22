@@ -41,14 +41,14 @@ public class ShuyunAuditFragment extends Fragment {
     private static final String TAG = "ShuyunAuditFragment";
 
     // UI控件
-    private TextView tvCountyStatus, tvAuditLog, tvCityFinishedList;
+    private TextView tvCountyStatus, tvAuditLog, tvCityFinishedList, tvCityTodoList, tvAuditTitle;
     private Button btnCountyAudit, btnStopCountyAudit;
     private Button btnCityAudit, btnStopCityAudit;
     private Button btnProvinceAudit, btnStopProvinceAudit;
     private Button btnProvinceMonitorAudit;
     private Spinner spinnerCounty;
     private ScrollView svAuditLog;
-    private android.widget.ListView lvCityFinishedList;
+    private android.widget.ListView lvCityFinishedList, lvCityTodoList;
 
     // 省级审核开发者权限IMEI
     private static final String PROVINCE_AUTH_IMEI = "ba9f03beaacd4c05";
@@ -58,6 +58,9 @@ public class ShuyunAuditFragment extends Fragment {
 
     // 市级已办工单列表（用于ListView显示）
     private List<ShuyunApi.CountyTaskInfo> cityFinishedTaskList = new ArrayList<>();
+
+    // 市级待办工单列表（用于ListView显示）
+    private List<ShuyunApi.CountyTaskInfo> cityTodoTaskList = new ArrayList<>();
 
     // 区县经理代号（县级审核用）
     private static final String[] COUNTY_CODES = {"36745", "31950"};
@@ -125,6 +128,7 @@ public class ShuyunAuditFragment extends Fragment {
     }
 
     private void initViews(View view) {
+        tvAuditTitle = view.findViewById(R.id.tvAuditTitle);
         tvCountyStatus = view.findViewById(R.id.tvCountyStatus);
         tvAuditLog = view.findViewById(R.id.tvAuditLog);
 
@@ -139,7 +143,9 @@ public class ShuyunAuditFragment extends Fragment {
         spinnerCounty = view.findViewById(R.id.spinnerCounty);
         svAuditLog = view.findViewById(R.id.svAuditLog);
         tvCityFinishedList = view.findViewById(R.id.tvCityFinishedList);
+        tvCityTodoList = view.findViewById(R.id.tvCityTodoList);
         lvCityFinishedList = view.findViewById(R.id.lvCityFinishedList);
+        lvCityTodoList = view.findViewById(R.id.lvCityTodoList);
 
         // 初始化区县选择器（县级审核用）
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
@@ -238,6 +244,7 @@ public class ShuyunAuditFragment extends Fragment {
         btnCountyAudit.setText("区县审核中");
         btnStopCountyAudit.setEnabled(true);
         updateStatus("审核中...");
+        tvAuditTitle.setText("区县审核中");
 
         countyThread = new Thread(() -> {
             while (isCountyRunning) {
@@ -327,9 +334,10 @@ public class ShuyunAuditFragment extends Fragment {
             mainHandler.post(() -> {
                 isCountyRunning = false;
                 btnCountyAudit.setEnabled(true);
-                btnCountyAudit.setText("开始区县审核");
+                btnCountyAudit.setText("区县审核");
                 btnStopCountyAudit.setEnabled(false);
                 updateStatus("已停止");
+                tvAuditTitle.setText("数运审核");
                 appendLog("县级审核已停止");
             });
         });
@@ -369,8 +377,14 @@ public class ShuyunAuditFragment extends Fragment {
 
         appendLog("市级审核已启动，区县: " + CITY_AREA_NAMES[selectedCityAreaIndex] + "(" + cityAreaCode + ")");
 
-        // 初始获取已办列表
+        // 初始获取待办和已办列表
         try {
+            // 获取待办列表
+            String todoJson = ShuyunApi.getCityTaskList(pcToken, cityAreaCode);
+            List<ShuyunApi.CountyTaskInfo> todoList = ShuyunApi.parseCountyTaskList(todoJson);
+            updateCityTodoList(todoList);
+
+            // 获取已办列表
             String finishedJson = ShuyunApi.getCityFinishedList(pcToken, cityAreaCode);
             List<ShuyunApi.CountyTaskInfo> finishedList = ShuyunApi.parseCountyTaskList(finishedJson);
             updateCityFinishedList(finishedList);
@@ -383,6 +397,7 @@ public class ShuyunAuditFragment extends Fragment {
         btnCityAudit.setText("市级审核中");
         btnStopCityAudit.setEnabled(true);
         updateStatus("市级审核中...");
+        tvAuditTitle.setText("市级审核中");
 
         cityThread = new Thread(() -> {
             while (isCityRunning) {
@@ -392,6 +407,9 @@ public class ShuyunAuditFragment extends Fragment {
                     String jsonStr = ShuyunApi.getCityTaskList(pcToken, cityAreaCode);
 
                     List<ShuyunApi.CountyTaskInfo> taskList = ShuyunApi.parseCountyTaskList(jsonStr);
+
+                    // 更新待办列表显示
+                    updateCityTodoList(taskList);
 
                     if (taskList.isEmpty()) {
                         appendLog("市级待审核工单为空");
@@ -406,7 +424,7 @@ public class ShuyunAuditFragment extends Fragment {
                             // 忽略
                         }
 
-                        // 等待下次检查（50-100秒随机），显示倒计时
+                        // 等待下次检查（50-100秒随机）
                         int sleepTime = (int) (Math.random() * 50000) + 50000;
                         showCountdown("等待下次: ", sleepTime);
                         continue;
@@ -517,9 +535,10 @@ public class ShuyunAuditFragment extends Fragment {
             mainHandler.post(() -> {
                 isCityRunning = false;
                 btnCityAudit.setEnabled(true);
-                btnCityAudit.setText("开始市级审核");
+                btnCityAudit.setText("市级审核");
                 btnStopCityAudit.setEnabled(false);
                 updateStatus("已停止");
+                tvAuditTitle.setText("数运审核");
                 appendLog("市级审核已停止");
             });
         });
@@ -647,6 +666,7 @@ public class ShuyunAuditFragment extends Fragment {
         btnProvinceAudit.setText("省级审核中");
         btnStopProvinceAudit.setEnabled(true);
         updateStatus("省级审核中...");
+        tvAuditTitle.setText("省级审核中");
 
         provinceThread = new Thread(() -> {
             try {
@@ -738,9 +758,10 @@ public class ShuyunAuditFragment extends Fragment {
             mainHandler.post(() -> {
                 isProvinceRunning = false;
                 btnProvinceAudit.setEnabled(true);
-                btnProvinceAudit.setText("开始省级审核");
+                btnProvinceAudit.setText("省级审核");
                 btnStopProvinceAudit.setEnabled(false);
                 updateStatus("已完成");
+                tvAuditTitle.setText("数运审核");
                 appendLog("省级审核已完成");
             });
         });
@@ -908,6 +929,59 @@ public class ShuyunAuditFragment extends Fragment {
     }
 
     /**
+     * 更新市级待办列表显示（显示前3条）
+     */
+    private void updateCityTodoList(List<ShuyunApi.CountyTaskInfo> todoList) {
+        // 保存列表数据
+        cityTodoTaskList = todoList != null ? todoList : new ArrayList<>();
+
+        mainHandler.post(() -> {
+            if (cityTodoTaskList.isEmpty()) {
+                tvCityTodoList.setText("暂无待办");
+                lvCityTodoList.setAdapter(null);
+                return;
+            }
+
+            // 显示前3条
+            List<String> displayList = new ArrayList<>();
+            int count = Math.min(cityTodoTaskList.size(), 3);
+            for (int i = 0; i < count; i++) {
+                ShuyunApi.CountyTaskInfo task = cityTodoTaskList.get(i);
+                StringBuilder sb = new StringBuilder();
+                sb.append(i + 1).append(". ").append(task.station_name);
+                if (task.orderNum != null && !task.orderNum.isEmpty()) {
+                    sb.append(" (").append(task.orderNum).append(")");
+                }
+                if (task.jobName != null && !task.jobName.isEmpty()) {
+                    sb.append(" [").append(task.jobName).append("]");
+                }
+                displayList.add(sb.toString());
+            }
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                    android.R.layout.simple_list_item_1, displayList);
+            lvCityTodoList.setAdapter(adapter);
+
+            // 同时更新TextView
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < count; i++) {
+                ShuyunApi.CountyTaskInfo task = cityTodoTaskList.get(i);
+                sb.append(i + 1).append(". ").append(task.station_name);
+                if (task.orderNum != null && !task.orderNum.isEmpty()) {
+                    sb.append(" (").append(task.orderNum).append(")");
+                }
+                if (task.jobName != null && !task.jobName.isEmpty()) {
+                    sb.append(" [").append(task.jobName).append("]");
+                }
+                if (i < count - 1) {
+                    sb.append("\n");
+                }
+            }
+            tvCityTodoList.setText(sb.toString());
+        });
+    }
+
+    /**
      * 更新市级已办列表显示（只显示省监控审核工单）
      */
     private void updateCityFinishedList(List<ShuyunApi.CountyTaskInfo> finishedList) {
@@ -979,37 +1053,16 @@ public class ShuyunAuditFragment extends Fragment {
 
     /**
      * 显示倒计时（等待期间实时显示剩余秒数，仅在日志中显示）
-     * @param prefix 日志前缀（已被忽略，统一显示"下次执行"）
+     * @param prefix 日志前缀（已被忽略）
      * @param totalMs 总等待毫秒数
      */
     private void showCountdown(String prefix, int totalMs) {
-        final int[] remainingSecs = {totalMs / 1000};
-        // 立即显示第一条（只在日志中显示，不在状态栏显示）
-        // 去掉"等待下次："前缀，只显示"下次执行剩余XX秒"
-        appendLog("下次执行，剩余 " + remainingSecs[0] + " 秒");
-
-        // 每秒更新一次日志
-        final Runnable[] countdownRunnable = {null};
-        countdownRunnable[0] = new Runnable() {
-            @Override
-            public void run() {
-                if (remainingSecs[0] > 0) {
-                    remainingSecs[0]--;
-                    appendLog("下次执行，剩余 " + remainingSecs[0] + " 秒");
-                    mainHandler.postDelayed(this, 1000);
-                }
-            }
-        };
-        mainHandler.postDelayed(countdownRunnable[0], 1000);
-
-        // 等待总时间
+        // 静默等待，不输出倒计时日志
         try {
             Thread.sleep(totalMs);
         } catch (InterruptedException e) {
             // 被中断时清理
         }
-        // 取消倒计时更新
-        mainHandler.removeCallbacks(countdownRunnable[0]);
     }
 
     @Override

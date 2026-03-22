@@ -69,7 +69,7 @@
                 android:padding="6dp" />
         </LinearLayout>
 
-        <!-- 审核按钮行（紧凑排列） -->
+        <!-- 审核按钮行1：开始按钮 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -79,74 +79,82 @@
             <Button
                 android:id="@+id/btnCountyAudit"
                 android:layout_width="0dp"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
-                android:text="开始县级审核"
-                android:textSize="11sp"
+                android:text="区县审核"
+                android:textSize="12sp"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#F59E0B" />
 
             <Button
-                android:id="@+id/btnStopCountyAudit"
-                android:layout_width="0dp"
-                android:layout_height="32dp"
-                android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:text="停止"
-                android:textSize="11sp"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#EF4444"
-                android:enabled="false" />
-
-            <Button
                 android:id="@+id/btnCityAudit"
                 android:layout_width="0dp"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:text="开始市级审核"
-                android:textSize="11sp"
+                android:layout_marginStart="8dp"
+                android:text="市级审核"
+                android:textSize="12sp"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#8B5CF6" />
 
             <Button
-                android:id="@+id/btnStopCityAudit"
+                android:id="@+id/btnProvinceAudit"
                 android:layout_width="0dp"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="8dp"
+                android:text="省级审核"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#10B981" />
+        </LinearLayout>
+
+        <!-- 审核按钮行2：停止按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center"
+            android:layout_marginTop="6dp">
+
+            <Button
+                android:id="@+id/btnStopCountyAudit"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
                 android:text="停止"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#EF4444"
                 android:enabled="false" />
 
             <Button
-                android:id="@+id/btnProvinceAudit"
+                android:id="@+id/btnStopCityAudit"
                 android:layout_width="0dp"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
-                android:layout_marginStart="6dp"
-                android:text="省级审核"
-                android:textSize="11sp"
+                android:layout_marginStart="8dp"
+                android:text="停止"
+                android:textSize="12sp"
                 android:textColor="@android:color/white"
-                android:backgroundTint="#10B981" />
+                android:backgroundTint="#EF4444"
+                android:enabled="false" />
 
             <Button
                 android:id="@+id/btnStopProvinceAudit"
                 android:layout_width="0dp"
-                android:layout_height="32dp"
+                android:layout_height="36dp"
                 android:layout_weight="1"
-                android:layout_marginStart="6dp"
+                android:layout_marginStart="8dp"
                 android:text="停止"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#EF4444"
                 android:enabled="false" />
         </LinearLayout>
     </LinearLayout>
 
-    <!-- 功能说明（单行紧凑显示） -->
+    <!-- 功能说明 -->
     <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -156,72 +164,162 @@
         app:cardElevation="1dp"
         app:cardBackgroundColor="#EFF6FF">
 
-        <TextView
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="县:自动/市:自动/省:手动，需开发者权限"
-            android:textSize="10sp"
-            android:textColor="#3B82F6"
-            android:padding="6dp" />
+            android:orientation="vertical"
+            android:padding="6dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="运行原理"
+                android:textSize="10sp"
+                android:textColor="#1E40AF"
+                android:textStyle="bold"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="县级：自动循环审批，每3条延迟4-8秒，45-105秒周期检查"
+                android:textSize="9sp"
+                android:textColor="#3B82F6"
+                android:layout_marginBottom="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="市级：自动循环审批，延期优先+普通兜底，50-100秒周期"
+                android:textSize="9sp"
+                android:textColor="#8B5CF6"
+                android:layout_marginBottom="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="省级：手动审核，需APP登录获取IMEI授权，需开发者权限"
+                android:textSize="9sp"
+                android:textColor="#10B981"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="设置使用"
+                android:textSize="10sp"
+                android:textColor="#1E40AF"
+                android:textStyle="bold"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="1.先在监控页面分别登录PC端和APP端 2.选择区县 3.点击对应审核按钮启动 4.省级需手动确认执行 5.省监控回单需选中工单后点击"
+                android:textSize="9sp"
+                android:textColor="#6B7280" />
+        </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- 市级已办列表（只显示省监控审核工单） -->
+    <!-- 市级待办和已办列表 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#ECFDF5"
-        android:layout_marginTop="4dp"
-        android:padding="6dp">
+        android:layout_marginTop="4dp">
 
+        <!-- 市级待办 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:background="#F3E8FF"
+            android:padding="6dp">
 
             <TextView
-                android:layout_width="0dp"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="省监控待回单"
+                android:text="市级待办"
                 android:textSize="11sp"
-                android:textColor="#059669"
+                android:textColor="#7C3AED"
                 android:textStyle="bold" />
 
-            <!-- 省监控审核回单按钮 -->
-            <Button
-                android:id="@+id/btnProvinceMonitorAudit"
-                android:layout_width="wrap_content"
-                android:layout_height="28dp"
-                android:text="回单"
-                android:textSize="10sp"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#EF4444"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
-                android:minWidth="0dp"
-                android:minHeight="0dp" />
+            <ListView
+                android:id="@+id/lvCityTodoList"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="2dp"
+                android:divider="#7C3AED"
+                android:dividerHeight="1dp"
+                android:scrollbars="vertical" />
+
+            <TextView
+                android:id="@+id/tvCityTodoList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="暂无待办"
+                android:textSize="9sp"
+                android:textColor="#6D28D9"
+                android:fontFamily="monospace" />
         </LinearLayout>
 
-        <!-- 可点击的已办列表 -->
-        <ListView
-            android:id="@+id/lvCityFinishedList"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="2dp"
-            android:divider="#059669"
-            android:dividerHeight="1dp"
-            android:scrollbars="vertical" />
-
-        <TextView
-            android:id="@+id/tvCityFinishedList"
+        <!-- 市级已办 -->
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="暂无省监控工单"
-            android:textSize="9sp"
-            android:textColor="#047857"
-            android:fontFamily="monospace" />
+            android:orientation="vertical"
+            android:background="#ECFDF5"
+            android:padding="6dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="省监控回单"
+                    android:textSize="11sp"
+                    android:textColor="#059669"
+                    android:textStyle="bold" />
+
+                <!-- 省监控审核回单按钮 -->
+                <Button
+                    android:id="@+id/btnProvinceMonitorAudit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="36dp"
+                    android:text="回单"
+                    android:textSize="11sp"
+                    android:textColor="@android:color/white"
+                    android:backgroundTint="#EF4444"
+                    android:paddingLeft="12dp"
+                    android:paddingRight="12dp"
+                    android:minWidth="0dp"
+                    android:minHeight="0dp" />
+            </LinearLayout>
+
+            <!-- 可点击的已办列表 -->
+            <ListView
+                android:id="@+id/lvCityFinishedList"
+                android:layout_width="match_parent"
+                android:layout_height="48dp"
+                android:layout_marginTop="2dp"
+                android:divider="#059669"
+                android:dividerHeight="1dp"
+                android:scrollbars="vertical" />
+
+            <TextView
+                android:id="@+id/tvCityFinishedList"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="暂无省监控工单"
+                android:textSize="9sp"
+                android:textColor="#047857"
+                android:fontFamily="monospace" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- 日志区域（加大高度） -->
