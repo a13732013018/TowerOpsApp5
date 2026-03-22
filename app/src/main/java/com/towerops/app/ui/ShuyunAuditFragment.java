@@ -65,6 +65,12 @@ public class ShuyunAuditFragment extends Fragment {
     // 市级待办工单列表（用于ListView显示）
     private List<ShuyunApi.CountyTaskInfo> cityTodoTaskList = new ArrayList<>();
 
+    // 过滤后的省监控工单列表（用于省监控回单区域的显示和点击选择）
+    private List<ShuyunApi.CountyTaskInfo> provinceMonitorTaskList = new ArrayList<>();
+
+    // 显示的前3条已办工单列表（用于市级已办区域的显示和点击选择）
+    private List<ShuyunApi.CountyTaskInfo> displayedCityFinishedList = new ArrayList<>();
+
     // 区县经理代号（县级审核用）
     private static final String[] COUNTY_CODES = {"36745", "31950"};
     private static final String[] COUNTY_NAMES = {"平阳县(36745)", "泰顺县(31950)"};
@@ -166,21 +172,21 @@ public class ShuyunAuditFragment extends Fragment {
             }
         }
 
-        // 市级已办列表点击事件（用于省监控回单选择）
+        // 省级监控回单列表点击事件（使用过滤后的列表）
         lvCityFinishedList.setOnItemClickListener((parent, itemView, position, id) -> {
-            if (cityFinishedTaskList != null && position < cityFinishedTaskList.size()) {
-                selectedCityFinishedTask = cityFinishedTaskList.get(position);
+            if (provinceMonitorTaskList != null && position < provinceMonitorTaskList.size()) {
+                selectedCityFinishedTask = provinceMonitorTaskList.get(position);
                 selectedCityTodoTask = null; // 清除待办选择
                 String jobName = selectedCityFinishedTask.jobName != null ? selectedCityFinishedTask.jobName : "";
-                Toast.makeText(getContext(), "已选择: " + selectedCityFinishedTask.station_name + " [" + jobName + "]", Toast.LENGTH_SHORT).show();
+                Toast.makeText(getContext(), "已选择: " + selectedCityFinishedTask.station_name + " (" + selectedCityFinishedTask.orderNum + ") [" + jobName + "]", Toast.LENGTH_SHORT).show();
             }
         });
 
-        // 市级待办列表点击事件（用于省监控回单选择）
+        // 市级已办列表点击事件（使用显示的前3条列表）
         lvCityTodoList.setOnItemClickListener((parent, itemView, position, id) -> {
-            if (cityTodoTaskList != null && position < cityTodoTaskList.size()) {
-                selectedCityTodoTask = cityTodoTaskList.get(position);
-                selectedCityFinishedTask = null; // 清除已办选择
+            if (displayedCityFinishedList != null && position < displayedCityFinishedList.size()) {
+                selectedCityTodoTask = displayedCityFinishedList.get(position);
+                selectedCityFinishedTask = null; // 清除省监控选择
                 String jobName = selectedCityTodoTask.jobName != null ? selectedCityTodoTask.jobName : "";
                 Toast.makeText(getContext(), "已选择: " + selectedCityTodoTask.station_name + " (" + selectedCityTodoTask.orderNum + ") [" + jobName + "]", Toast.LENGTH_SHORT).show();
             }
@@ -947,40 +953,31 @@ public class ShuyunAuditFragment extends Fragment {
     }
 
     /**
-     * 更新市级已办列表显示（只显示省监控审核工单）
-     * 原"市级待办"区域现在显示已办数据
+     * 更新市级已办列表显示（前3条，不过滤）
+     * 显示：站名 + 工单号 + 当前环节
      */
     private void updateCityTodoList(List<ShuyunApi.CountyTaskInfo> todoList) {
         // 保存列表数据（实际上是已办数据）
         cityTodoTaskList = todoList != null ? todoList : new ArrayList<>();
 
+        // 保存前3条显示（不过滤）用于点击选择
+        displayedCityFinishedList.clear();
+        int count = Math.min(cityTodoTaskList.size(), 3);
+        for (int i = 0; i < count; i++) {
+            displayedCityFinishedList.add(cityTodoTaskList.get(i));
+        }
+
         mainHandler.post(() -> {
-            if (cityTodoTaskList.isEmpty()) {
-                tvCityTodoList.setText("暂无省监控工单");
+            if (displayedCityFinishedList.isEmpty()) {
+                tvCityTodoList.setText("暂无已办工单");
                 lvCityTodoList.setAdapter(null);
                 return;
             }
 
-            // 只显示省监控审核工单
+            // 显示前3条：站名 + 工单号 + 当前环节
             List<String> displayList = new ArrayList<>();
-            List<ShuyunApi.CountyTaskInfo> provinceMonitorTasks = new ArrayList<>();
-
-            for (ShuyunApi.CountyTaskInfo task : cityTodoTaskList) {
-                if (task.jobName != null && task.jobName.contains("省监控")) {
-                    provinceMonitorTasks.add(task);
-                }
-            }
-
-            if (provinceMonitorTasks.isEmpty()) {
-                tvCityTodoList.setText("暂无省监控工单");
-                lvCityTodoList.setAdapter(null);
-                return;
-            }
-
-            // 显示省监控工单前3条：站名 + 工单号 + 当前环节
-            int count = Math.min(provinceMonitorTasks.size(), 3);
             for (int i = 0; i < count; i++) {
-                ShuyunApi.CountyTaskInfo task = provinceMonitorTasks.get(i);
+                ShuyunApi.CountyTaskInfo task = displayedCityFinishedList.get(i);
                 StringBuilder sb = new StringBuilder();
                 sb.append(i + 1).append(". ").append(task.station_name);
                 if (task.orderNum != null && !task.orderNum.isEmpty()) {
@@ -996,10 +993,10 @@ public class ShuyunAuditFragment extends Fragment {
                     android.R.layout.simple_list_item_1, displayList);
             lvCityTodoList.setAdapter(adapter);
 
-            // 同时更新TextView：站名 + 工单号 + 当前环节（前3条）
+            // 同时更新TextView
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < count; i++) {
-                ShuyunApi.CountyTaskInfo task = provinceMonitorTasks.get(i);
+                ShuyunApi.CountyTaskInfo task = displayedCityFinishedList.get(i);
                 sb.append(i + 1).append(". ").append(task.station_name);
                 if (task.orderNum != null && !task.orderNum.isEmpty()) {
                     sb.append(" (").append(task.orderNum).append(")");
@@ -1018,40 +1015,40 @@ public class ShuyunAuditFragment extends Fragment {
     /**
      * 更新市级已办列表显示（只显示省监控审核工单）
      */
+    /**
+     * 更新省监控回单列表显示（只显示省监控审核工单）
+     * 显示：站名 + 工单号 + 当前环节
+     */
     private void updateCityFinishedList(List<ShuyunApi.CountyTaskInfo> finishedList) {
         // 保存列表数据
         cityFinishedTaskList = finishedList != null ? finishedList : new ArrayList<>();
 
+        // 只显示省监控审核工单，保存用于点击选择
+        provinceMonitorTaskList.clear();
+        for (ShuyunApi.CountyTaskInfo task : cityFinishedTaskList) {
+            if (task.jobName != null && task.jobName.contains("省监控")) {
+                provinceMonitorTaskList.add(task);
+            }
+        }
+
         mainHandler.post(() -> {
-            if (cityFinishedTaskList.isEmpty()) {
+            if (provinceMonitorTaskList.isEmpty()) {
                 tvCityFinishedList.setText("暂无省监控工单");
                 lvCityFinishedList.setAdapter(null);
                 return;
             }
 
-            // 只显示省监控审核工单
+            // 显示省监控工单：站名 + 工单号 + 当前环节
             List<String> displayList = new ArrayList<>();
-            List<ShuyunApi.CountyTaskInfo> provinceMonitorTasks = new ArrayList<>();
-
-            for (ShuyunApi.CountyTaskInfo task : cityFinishedTaskList) {
-                if (task.jobName != null && task.jobName.contains("省监控")) {
-                    provinceMonitorTasks.add(task);
-                }
-            }
-
-            if (provinceMonitorTasks.isEmpty()) {
-                tvCityFinishedList.setText("暂无省监控工单");
-                lvCityFinishedList.setAdapter(null);
-                return;
-            }
-
-            // 显示省监控工单
-            for (int i = 0; i < provinceMonitorTasks.size(); i++) {
-                ShuyunApi.CountyTaskInfo task = provinceMonitorTasks.get(i);
+            for (int i = 0; i < provinceMonitorTaskList.size(); i++) {
+                ShuyunApi.CountyTaskInfo task = provinceMonitorTaskList.get(i);
                 StringBuilder sb = new StringBuilder();
                 sb.append(i + 1).append(". ").append(task.station_name);
                 if (task.orderNum != null && !task.orderNum.isEmpty()) {
                     sb.append(" (").append(task.orderNum).append(")");
+                }
+                if (task.jobName != null && !task.jobName.isEmpty()) {
+                    sb.append(" [").append(task.jobName).append("]");
                 }
                 displayList.add(sb.toString());
             }
@@ -1060,15 +1057,18 @@ public class ShuyunAuditFragment extends Fragment {
                     android.R.layout.simple_list_item_1, displayList);
             lvCityFinishedList.setAdapter(adapter);
 
-            // 同时更新TextView（保留兼容性）
+            // 同时更新TextView：站名 + 工单号 + 当前环节
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < provinceMonitorTasks.size(); i++) {
-                ShuyunApi.CountyTaskInfo task = provinceMonitorTasks.get(i);
+            for (int i = 0; i < provinceMonitorTaskList.size(); i++) {
+                ShuyunApi.CountyTaskInfo task = provinceMonitorTaskList.get(i);
                 sb.append(i + 1).append(". ").append(task.station_name);
                 if (task.orderNum != null && !task.orderNum.isEmpty()) {
                     sb.append(" (").append(task.orderNum).append(")");
                 }
-                if (i < provinceMonitorTasks.size() - 1) {
+                if (task.jobName != null && !task.jobName.isEmpty()) {
+                    sb.append(" [").append(task.jobName).append("]");
+                }
+                if (i < provinceMonitorTaskList.size() - 1) {
                     sb.append("\n");
                 }
             }
