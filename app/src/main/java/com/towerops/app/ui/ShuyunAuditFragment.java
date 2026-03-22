@@ -908,7 +908,7 @@ public class ShuyunAuditFragment extends Fragment {
     }
 
     /**
-     * 更新市级已办列表显示（显示前3条，带当前环节）
+     * 更新市级已办列表显示（显示前3条 + 省监控审核工单，不重复）
      */
     private void updateCityFinishedList(List<ShuyunApi.CountyTaskInfo> finishedList) {
         // 保存列表数据
@@ -921,10 +921,12 @@ public class ShuyunAuditFragment extends Fragment {
                 return;
             }
 
-            // 更新ListView
+            // 分离显示：前3条 + 省监控审核工单（排除已显示的）
             List<String> displayList = new ArrayList<>();
-            int count = Math.min(cityFinishedTaskList.size(), 3);
-            for (int i = 0; i < count; i++) {
+
+            // 前3条普通工单
+            int normalCount = Math.min(cityFinishedTaskList.size(), 3);
+            for (int i = 0; i < normalCount; i++) {
                 ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
                 StringBuilder sb = new StringBuilder();
                 sb.append(i + 1).append(". ").append(task.station_name);
@@ -939,13 +941,28 @@ public class ShuyunAuditFragment extends Fragment {
                 displayList.add(sb.toString());
             }
 
+            // 找出省监控审核工单（不在前3条中的）
+            for (int i = 3; i < cityFinishedTaskList.size(); i++) {
+                ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
+                if (task.jobName != null && task.jobName.contains("省监控")) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("★ ").append(task.station_name);
+                    if (task.orderNum != null && !task.orderNum.isEmpty()) {
+                        sb.append(" (").append(task.orderNum).append(")");
+                    }
+                    sb.append(" [").append(task.jobName).append("]");
+                    displayList.add(sb.toString());
+                }
+            }
+
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
                     android.R.layout.simple_list_item_1, displayList);
             lvCityFinishedList.setAdapter(adapter);
 
             // 同时更新TextView（保留兼容性）
             StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < count; i++) {
+            // 前3条
+            for (int i = 0; i < normalCount; i++) {
                 ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
                 sb.append(i + 1).append(". ").append(task.station_name);
                 // 先显示工单号
@@ -956,8 +973,22 @@ public class ShuyunAuditFragment extends Fragment {
                 if (task.jobName != null && !task.jobName.isEmpty()) {
                     sb.append(" [").append(task.jobName).append("]");
                 }
-                if (i < count - 1) {
+                if (i < cityFinishedTaskList.size() - 1) {
                     sb.append("\n");
+                }
+            }
+            // 省监控审核工单
+            for (int i = 3; i < cityFinishedTaskList.size(); i++) {
+                ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
+                if (task.jobName != null && task.jobName.contains("省监控")) {
+                    if (sb.length() > 0 && sb.charAt(sb.length() - 1) != '\n') {
+                        sb.append("\n");
+                    }
+                    sb.append("★ ").append(task.station_name);
+                    if (task.orderNum != null && !task.orderNum.isEmpty()) {
+                        sb.append(" (").append(task.orderNum).append(")");
+                    }
+                    sb.append(" [").append(task.jobName).append("]");
                 }
             }
             tvCityFinishedList.setText(sb.toString());
@@ -974,14 +1005,15 @@ public class ShuyunAuditFragment extends Fragment {
     }
 
     /**
-     * 显示倒计时（等待期间实时显示剩余秒数）
-     * @param prefix 日志前缀
+     * 显示倒计时（等待期间实时显示剩余秒数，仅在日志中显示）
+     * @param prefix 日志前缀（已被忽略，统一显示"下次执行"）
      * @param totalMs 总等待毫秒数
      */
     private void showCountdown(String prefix, int totalMs) {
         final int[] remainingSecs = {totalMs / 1000};
         // 立即显示第一条（只在日志中显示，不在状态栏显示）
-        appendLog(prefix + remainingSecs[0] + "秒");
+        // 去掉"等待下次："前缀，只显示"下次执行剩余XX秒"
+        appendLog("下次执行，剩余 " + remainingSecs[0] + " 秒");
 
         // 每秒更新一次日志
         final Runnable[] countdownRunnable = {null};
@@ -990,7 +1022,7 @@ public class ShuyunAuditFragment extends Fragment {
             public void run() {
                 if (remainingSecs[0] > 0) {
                     remainingSecs[0]--;
-                    appendLog(prefix + remainingSecs[0] + "秒");
+                    appendLog("下次执行，剩余 " + remainingSecs[0] + " 秒");
                     mainHandler.postDelayed(this, 1000);
                 }
             }

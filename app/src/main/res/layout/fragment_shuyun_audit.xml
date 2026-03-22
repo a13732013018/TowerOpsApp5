@@ -75,12 +75,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="12dp">
 
             <Button
                 android:id="@+id/btnCountyAudit"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
                 android:text="开始县级审核"
                 android:textSize="12sp"
@@ -90,7 +90,7 @@
             <Button
                 android:id="@+id/btnStopCountyAudit"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
                 android:layout_marginStart="10dp"
                 android:text="停止"
@@ -106,12 +106,12 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="12dp">
 
             <Button
                 android:id="@+id/btnCityAudit"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
                 android:text="开始市级审核"
                 android:textSize="12sp"
@@ -121,7 +121,7 @@
             <Button
                 android:id="@+id/btnStopCityAudit"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
+                android:layout_height="40dp"
                 android:layout_weight="1"
                 android:layout_marginStart="10dp"
                 android:text="停止"
@@ -136,7 +136,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_marginBottom="4dp">
 
             <Button
                 android:id="@+id/btnProvinceAudit"
@@ -190,33 +191,41 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 县级审核（橙色）：区县经理审批，每3条延迟4-8秒"
+                android:text="• 县级审核（橙色）：区县经理审批，自动运行，每3条延迟4-8秒，45-105秒循环检查"
                 android:textSize="10sp"
                 android:textColor="#3B82F6"
-                android:layout_marginBottom="1dp" />
+                android:layout_marginBottom="2dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 市级审核（紫色）：市公司审批，自动延期双试"
+                android:text="• 市级审核（紫色）：市公司审批，自动运行，延期审核优先，普通审核兜底，50-100秒循环"
                 android:textSize="10sp"
-                android:textColor="#3B82F6"
-                android:layout_marginBottom="1dp" />
+                android:textColor="#8B5CF6"
+                android:layout_marginBottom="2dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 省级审核（绿色）：省公司审批（需开发者权限）"
+                android:text="• 省级审核（绿色）：省公司审批，需开发者权限，需APP登录获取IMEI授权，手动确认执行"
                 android:textSize="10sp"
                 android:textColor="#10B981"
-                android:layout_marginBottom="1dp" />
+                android:layout_marginBottom="2dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 选择区县后开始，下次时间日志显示"
+                android:text="• 省监控回单：选择市级已办中省监控环节的工单进行归档回单，需省级权限"
                 android:textSize="10sp"
-                android:textColor="#3B82F6" />
+                android:textColor="#EF4444"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 已办列表：显示最近3条+省监控审核工单，点击可选中工单进行回单操作"
+                android:textSize="10sp"
+                android:textColor="#059669" />
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
@@ -248,13 +257,13 @@
             <Button
                 android:id="@+id/btnProvinceMonitorAudit"
                 android:layout_width="wrap_content"
-                android:layout_height="28dp"
+                android:layout_height="36dp"
                 android:text="省监控回单"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#EF4444"
-                android:paddingLeft="8dp"
-                android:paddingRight="8dp"
+                android:paddingLeft="10dp"
+                android:paddingRight="10dp"
                 android:minWidth="0dp"
                 android:minHeight="0dp" />
         </LinearLayout>

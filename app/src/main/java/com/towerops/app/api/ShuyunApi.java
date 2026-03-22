@@ -1076,13 +1076,14 @@ public class ShuyunApi {
      */
     public static String getCityFinishedList(String pcToken, String cityArea) {
         // 与易语言一致：URL和body都带参数，使用POST请求（form-urlencoded）
+        // limit=10用于获取更多数据，以便分离显示前3条+省监控审核工单
         String url = PC_BASE + "/api/flowable/flowable/task/listToFinish"
                 + "?page=1"
-                + "&limit=3"
+                + "&limit=10"
                 + "&userId=" + CITY_AUDIT_USER_ID
                 + "&flowId=&orderType=&area=330300&cityArea=" + cityArea;
 
-        String post = "page=1&limit=3&userId=" + CITY_AUDIT_USER_ID
+        String post = "page=1&limit=10&userId=" + CITY_AUDIT_USER_ID
                 + "&flowId=&orderType=&area=330300&cityArea=" + cityArea;
 
         String headers = buildCountyApiHeader(pcToken);
