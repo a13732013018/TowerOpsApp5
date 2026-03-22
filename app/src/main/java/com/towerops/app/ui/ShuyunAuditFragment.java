@@ -376,16 +376,17 @@ public class ShuyunAuditFragment extends Fragment {
                             result = ShuyunApi.submitCityDelayAudit(pcToken,
                                 task.orderNum, task.jobInstId, task.flowInstId,
                                 task.jobId, task.workInstId, task.flowId, task.jobId);
-                            appendLog("✓ 延期审核: " + task.station_name);
                         } else {
                             // 普通审核
                             result = ShuyunApi.submitCityAudit(pcToken,
                                 task.orderNum, task.jobInstId, task.flowInstId,
                                 task.jobId, task.workInstId, task.flowId, task.jobId);
-                            appendLog("✓ 审核通过: " + task.station_name);
                         }
 
-                        if (!ShuyunApi.isSuccess(result)) {
+                        // 根据返回结果判断成功或失败
+                        if (ShuyunApi.isSuccess(result)) {
+                            appendLog("✓ 审核通过: " + task.station_name);
+                        } else {
                             appendLog("✗ 审核失败: " + task.station_name + " - " + result);
                         }
                     }
