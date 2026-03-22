@@ -908,7 +908,7 @@ public class ShuyunAuditFragment extends Fragment {
     }
 
     /**
-     * 更新市级已办列表显示（显示前3条 + 省监控审核工单，不重复）
+     * 更新市级已办列表显示（只显示省监控审核工单）
      */
     private void updateCityFinishedList(List<ShuyunApi.CountyTaskInfo> finishedList) {
         // 保存列表数据
@@ -916,43 +916,36 @@ public class ShuyunAuditFragment extends Fragment {
 
         mainHandler.post(() -> {
             if (cityFinishedTaskList.isEmpty()) {
-                tvCityFinishedList.setText("暂无已办记录");
+                tvCityFinishedList.setText("暂无省监控工单");
                 lvCityFinishedList.setAdapter(null);
                 return;
             }
 
-            // 分离显示：前3条 + 省监控审核工单（排除已显示的）
+            // 只显示省监控审核工单
             List<String> displayList = new ArrayList<>();
+            List<ShuyunApi.CountyTaskInfo> provinceMonitorTasks = new ArrayList<>();
 
-            // 前3条普通工单
-            int normalCount = Math.min(cityFinishedTaskList.size(), 3);
-            for (int i = 0; i < normalCount; i++) {
-                ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
+            for (ShuyunApi.CountyTaskInfo task : cityFinishedTaskList) {
+                if (task.jobName != null && task.jobName.contains("省监控")) {
+                    provinceMonitorTasks.add(task);
+                }
+            }
+
+            if (provinceMonitorTasks.isEmpty()) {
+                tvCityFinishedList.setText("暂无省监控工单");
+                lvCityFinishedList.setAdapter(null);
+                return;
+            }
+
+            // 显示省监控工单
+            for (int i = 0; i < provinceMonitorTasks.size(); i++) {
+                ShuyunApi.CountyTaskInfo task = provinceMonitorTasks.get(i);
                 StringBuilder sb = new StringBuilder();
                 sb.append(i + 1).append(". ").append(task.station_name);
-                // 先显示工单号
                 if (task.orderNum != null && !task.orderNum.isEmpty()) {
                     sb.append(" (").append(task.orderNum).append(")");
                 }
-                // 后显示当前环节
-                if (task.jobName != null && !task.jobName.isEmpty()) {
-                    sb.append(" [").append(task.jobName).append("]");
-                }
                 displayList.add(sb.toString());
-            }
-
-            // 找出省监控审核工单（不在前3条中的）
-            for (int i = 3; i < cityFinishedTaskList.size(); i++) {
-                ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
-                if (task.jobName != null && task.jobName.contains("省监控")) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("★ ").append(task.station_name);
-                    if (task.orderNum != null && !task.orderNum.isEmpty()) {
-                        sb.append(" (").append(task.orderNum).append(")");
-                    }
-                    sb.append(" [").append(task.jobName).append("]");
-                    displayList.add(sb.toString());
-                }
             }
 
             ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
@@ -961,34 +954,14 @@ public class ShuyunAuditFragment extends Fragment {
 
             // 同时更新TextView（保留兼容性）
             StringBuilder sb = new StringBuilder();
-            // 前3条
-            for (int i = 0; i < normalCount; i++) {
-                ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
+            for (int i = 0; i < provinceMonitorTasks.size(); i++) {
+                ShuyunApi.CountyTaskInfo task = provinceMonitorTasks.get(i);
                 sb.append(i + 1).append(". ").append(task.station_name);
-                // 先显示工单号
                 if (task.orderNum != null && !task.orderNum.isEmpty()) {
                     sb.append(" (").append(task.orderNum).append(")");
                 }
-                // 后显示当前环节
-                if (task.jobName != null && !task.jobName.isEmpty()) {
-                    sb.append(" [").append(task.jobName).append("]");
-                }
-                if (i < cityFinishedTaskList.size() - 1) {
+                if (i < provinceMonitorTasks.size() - 1) {
                     sb.append("\n");
-                }
-            }
-            // 省监控审核工单
-            for (int i = 3; i < cityFinishedTaskList.size(); i++) {
-                ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
-                if (task.jobName != null && task.jobName.contains("省监控")) {
-                    if (sb.length() > 0 && sb.charAt(sb.length() - 1) != '\n') {
-                        sb.append("\n");
-                    }
-                    sb.append("★ ").append(task.station_name);
-                    if (task.orderNum != null && !task.orderNum.isEmpty()) {
-                        sb.append(" (").append(task.orderNum).append(")");
-                    }
-                    sb.append(" [").append(task.jobName).append("]");
                 }
             }
             tvCityFinishedList.setText(sb.toString());
@@ -997,9 +970,9 @@ public class ShuyunAuditFragment extends Fragment {
 
     private void appendLog(String msg) {
         mainHandler.post(() -> {
-            String time = new SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(new Date());
+            // 去掉时间显示，只显示日志内容
             String log = tvAuditLog.getText().toString();
-            tvAuditLog.setText(log + "\n[" + time + "] " + msg);
+            tvAuditLog.setText(log + "\n" + msg);
             svAuditLog.post(() -> svAuditLog.fullScroll(View.FOCUS_DOWN));
         });
     }
