@@ -367,7 +367,12 @@ public class ShuyunAuditFragment extends Fragment {
                             task.orderNum, task.jobInstId, task.relaType,
                             task.flowInstId, task.jobId, task.workInstId, task.flowId);
 
+                        appendLog("延期判断返回: " + (delayResult != null ? delayResult : "null"));
+
                         String delayType = ShuyunApi.parseDelayResult(delayResult);
+                        String jobIdFromDelay = ShuyunApi.extractJobIdFromDelayResult(delayResult);
+
+                        appendLog("延期判断结果: " + delayType + ", jobId: " + jobIdFromDelay);
 
                         // 提交审核：两种都尝试，一种成功就OK
                         String result = "";
@@ -375,10 +380,10 @@ public class ShuyunAuditFragment extends Fragment {
 
                         if ("省监控审核".equals(delayType)) {
                             // 延期审核优先
-                            appendLog("延期判断: 省监控审核，执行延期审核");
+                            appendLog("执行延期审核，jobId: " + jobIdFromDelay);
                             result = ShuyunApi.submitCityDelayAudit(pcToken,
                                 task.orderNum, task.jobInstId, task.flowInstId,
-                                task.jobId, task.workInstId, task.flowId, task.jobId);
+                                jobIdFromDelay, task.workInstId, task.flowId, jobIdFromDelay);
                             appendLog("延期审核返回: " + (result != null ? result : "null"));
 
                             if (ShuyunApi.isSuccess(result)) {
@@ -388,16 +393,16 @@ public class ShuyunAuditFragment extends Fragment {
                                 appendLog("延期审核失败，尝试普通审核");
                                 result = ShuyunApi.submitCityAudit(pcToken,
                                     task.orderNum, task.jobInstId, task.flowInstId,
-                                    task.jobId, task.workInstId, task.flowId, task.jobId);
+                                    jobIdFromDelay, task.workInstId, task.flowId, jobIdFromDelay);
                                 appendLog("普通审核返回: " + (result != null ? result : "null"));
                                 auditSuccess = ShuyunApi.isSuccess(result);
                             }
                         } else {
                             // 普通审核优先
-                            appendLog("延期判断: 普通审核，执行普通审核");
+                            appendLog("执行普通审核，jobId: " + jobIdFromDelay);
                             result = ShuyunApi.submitCityAudit(pcToken,
                                 task.orderNum, task.jobInstId, task.flowInstId,
-                                task.jobId, task.workInstId, task.flowId, task.jobId);
+                                jobIdFromDelay, task.workInstId, task.flowId, jobIdFromDelay);
                             appendLog("普通审核返回: " + (result != null ? result : "null"));
 
                             if (ShuyunApi.isSuccess(result)) {
@@ -407,7 +412,7 @@ public class ShuyunAuditFragment extends Fragment {
                                 appendLog("普通审核失败，尝试延期审核");
                                 result = ShuyunApi.submitCityDelayAudit(pcToken,
                                     task.orderNum, task.jobInstId, task.flowInstId,
-                                    task.jobId, task.workInstId, task.flowId, task.jobId);
+                                    jobIdFromDelay, task.workInstId, task.flowId, jobIdFromDelay);
                                 appendLog("延期审核返回: " + (result != null ? result : "null"));
                                 auditSuccess = ShuyunApi.isSuccess(result);
                             }

@@ -1010,35 +1010,60 @@ public class ShuyunApi {
     /**
      * 解析延期判断结果
      * @param jsonStr API返回的JSON
-     * @return 延期判断结果：自动审核/省监控审核/铁塔省监控
+     * @return 延期判断结果：自动审核/省监控审核
      */
     public static String parseDelayResult(String jsonStr) {
+        if (jsonStr == null || jsonStr.isEmpty()) {
+            return "自动审核";
+        }
         try {
-            // 从返回的JSON中提取延期判断结果
-            // 根据易语言代码，返回值包含 jobId_ID 和延期判断结果
-            if (jsonStr == null || jsonStr.isEmpty()) {
-                return "自动审核"; // 默认走普通审核
-            }
+            // 返回的是纯JSON对象（不是包装在data里）
             JSONObject root = new JSONObject(jsonStr);
-            // 检查是否包含延期相关字段
-            if (root.has("data")) {
-                JSONObject data = root.optJSONObject("data");
-                if (data != null) {
-                    String jobId = data.optString("jobId", "");
-                    // 根据jobId判断审核类型
-                    if (jobId.contains("延期") || jobId.contains("省监控")) {
-                        return "省监控审核";
-                    }
+
+            // 从 nextJobsList[0].checktitle 获取延期判断结果
+            JSONArray nextJobsList = root.optJSONArray("nextJobsList");
+            if (nextJobsList != null && nextJobsList.length() > 0) {
+                JSONObject firstJob = nextJobsList.getJSONObject(0);
+                String checktitle = firstJob.optString("checktitle", "");
+
+                // 根据 checktitle 判断审核类型
+                if (checktitle.contains("省监控") || checktitle.contains("延期")) {
+                    return "省监控审核";
                 }
+                // 默认是自动审核
+                return "自动审核";
             }
-            // 检查是否包含特定关键字
-            if (jsonStr.contains("省监控") || jsonStr.contains("延期")) {
-                return "省监控审核";
-            }
+
             return "自动审核";
         } catch (Exception e) {
             e.printStackTrace();
             return "自动审核";
+        }
+    }
+
+    /**
+     * 从延期判断结果中提取 jobId（用于提交审核）
+     * @param jsonStr API返回的JSON
+     * @return jobId 字符串
+     */
+    public static String extractJobIdFromDelayResult(String jsonStr) {
+        if (jsonStr == null || jsonStr.isEmpty()) {
+            return "";
+        }
+        try {
+            JSONObject root = new JSONObject(jsonStr);
+
+            // 从 nextJobsList[0].jobId 获取
+            JSONArray nextJobsList = root.optJSONArray("nextJobsList");
+            if (nextJobsList != null && nextJobsList.length() > 0) {
+                JSONObject firstJob = nextJobsList.getJSONObject(0);
+                return firstJob.optString("jobId", "");
+            }
+
+            return "";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
         }
     }
 
