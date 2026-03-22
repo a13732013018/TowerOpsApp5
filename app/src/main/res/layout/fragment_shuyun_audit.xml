@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="#F5F7FA">
 
-    <!-- 顶部状态栏 -->
+    <!-- 顶部标题栏 -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -25,14 +25,6 @@
             android:textSize="16sp"
             android:textColor="#333333"
             android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvCountyStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="未启动"
-            android:textSize="13sp"
-            android:textColor="#6B7280" />
     </LinearLayout>
 
     <!-- 审核控制面板（紧凑布局） -->
@@ -239,7 +231,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="市级待办"
+                android:text="市级已办"
                 android:textSize="11sp"
                 android:textColor="#7C3AED"
                 android:textStyle="bold" />
@@ -328,7 +320,7 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:orientation="vertical"
-        android:background="#1F2937"
+        android:background="#FFFFFF"
         android:layout_marginTop="4dp">
 
         <TextView
@@ -336,12 +328,12 @@
             android:layout_height="wrap_content"
             android:text="审核日志"
             android:textSize="11sp"
-            android:textColor="#9CA3AF"
+            android:textColor="#666666"
             android:paddingLeft="10dp"
             android:paddingRight="10dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
-            android:background="#111827" />
+            android:background="#F3F4F6" />
 
         <ScrollView
             android:id="@+id/svAuditLog"
@@ -357,7 +349,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:textSize="10sp"
-                android:textColor="#E5E7EB"
+                android:textColor="#000000"
                 android:fontFamily="monospace"
                 android:lineSpacingMultiplier="1.15" />
         </ScrollView>
