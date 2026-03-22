@@ -236,6 +236,9 @@ public class ShuyunAuditFragment extends Fragment {
                             updateStatus("审核中 " + (currentIndex + 1) + "/" + taskList.size());
                         });
 
+                        // 添加等待日志
+                        appendLog("等待 " + delay / 1000 + " 秒后审核: " + task.station_name);
+
                         Thread.sleep(delay);
 
                         if (!isCountyRunning) break;
@@ -329,6 +332,15 @@ public class ShuyunAuditFragment extends Fragment {
 
         appendLog("市级审核已启动，区县: " + CITY_AREA_NAMES[selectedCityAreaIndex] + "(" + cityAreaCode + ")");
 
+        // 初始获取已办列表
+        try {
+            String finishedJson = ShuyunApi.getCityFinishedList(pcToken, cityAreaCode);
+            List<ShuyunApi.CountyTaskInfo> finishedList = ShuyunApi.parseCountyTaskList(finishedJson);
+            updateCityFinishedList(finishedList);
+        } catch (Exception e) {
+            // 忽略初始获取错误
+        }
+
         isCityRunning = true;
         btnCityAudit.setEnabled(false);
         btnCityAudit.setText("市级审核中");
@@ -347,6 +359,16 @@ public class ShuyunAuditFragment extends Fragment {
                     if (taskList.isEmpty()) {
                         appendLog("市级待审核工单为空");
                         mainHandler.post(() -> updateStatus("待审: 0"));
+
+                        // 刷新已办列表显示
+                        try {
+                            String finishedJson = ShuyunApi.getCityFinishedList(pcToken, cityAreaCode);
+                            List<ShuyunApi.CountyTaskInfo> finishedList = ShuyunApi.parseCountyTaskList(finishedJson);
+                            updateCityFinishedList(finishedList);
+                        } catch (Exception e) {
+                            // 忽略
+                        }
+
                         // 等待下次检查（50-100秒随机）
                         int sleepTime = (int) (Math.random() * 50000) + 50000;
                         Thread.sleep(sleepTime);
@@ -368,6 +390,9 @@ public class ShuyunAuditFragment extends Fragment {
                         mainHandler.post(() -> {
                             updateStatus("审核中 " + (currentIndex + 1) + "/" + taskList.size());
                         });
+
+                        // 添加等待日志
+                        appendLog("等待 " + delay / 1000 + " 秒后审核: " + task.station_name);
 
                         Thread.sleep(delay);
 

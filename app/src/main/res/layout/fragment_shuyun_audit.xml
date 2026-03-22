@@ -154,22 +154,105 @@
                 android:textSize="12sp"
                 android:textColor="#1E40AF"
                 android:textStyle="bold"
-                android:layout_marginBottom="6dp" />
+                android:layout_marginBottom="4dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 县级审核：区县经理审批（橙色按钮）"
-                android:textSize="11sp"
-                android:textColor="#3B82F6"
+                android:text="【审核类型】"
+                android:textSize="10sp"
+                android:textColor="#1E40AF"
+                android:textStyle="bold"
                 android:layout_marginBottom="2dp" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 市级审核：市公司审批（紫色按钮）"
-                android:textSize="11sp"
+                android:text="• 县级审核：区县经理审批（橙色）"
+                android:textSize="10sp"
                 android:textColor="#3B82F6"
+                android:layout_marginBottom="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 市级审核：市公司审批（紫色）"
+                android:textSize="10sp"
+                android:textColor="#3B82F6"
+                android:layout_marginBottom="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 省级审核：省公司审批（开发中）"
+                android:textSize="10sp"
+                android:textColor="#9CA3AF"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="【运行原理】"
+                android:textSize="10sp"
+                android:textColor="#1E40AF"
+                android:textStyle="bold"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 自动获取待审核列表并逐个通过"
+                android:textSize="10sp"
+                android:textColor="#3B82F6"
+                android:layout_marginBottom="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 县级每条延迟2-6秒，每3条额外4-8秒"
+                android:textSize="10sp"
+                android:textColor="#3B82F6"
+                android:layout_marginBottom="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 市级自动判断延期，普通/延期双试"
+                android:textSize="10sp"
+                android:textColor="#3B82F6"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="【设置说明】"
+                android:textSize="10sp"
+                android:textColor="#1E40AF"
+                android:textStyle="bold"
+                android:layout_marginBottom="2dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 选择区县后点击开始，启动后自动运行"
+                android:textSize="10sp"
+                android:textColor="#3B82F6"
+                android:layout_marginBottom="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 下次执行时间在日志中显示"
+                android:textSize="10sp"
+                android:textColor="#3B82F6"
+                android:layout_marginBottom="1dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="• 已办列表显示最近3条审核记录"
+                android:textSize="10sp"
+                android:textColor="#3B82F6" />
                 android:layout_marginBottom="2dp" />
 
             <TextView
