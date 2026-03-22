@@ -772,11 +772,13 @@ public class ShuyunAuditFragment extends Fragment {
                     if (!isProvinceRunning) break;
 
                     // 延期判断获取 jobId_ID（与易语言一致）
-                    String delayResult = ShuyunApi.checkDelay(pcToken,
+                    // 省级审核使用PROVINCE_AUDIT_USER_ID(32269)
+                    String delayResult = ShuyunApi.checkDelayForProvince(pcToken,
                         task.orderNum, task.jobInstId, task.relaType,
                         task.flowInstId, task.jobId, task.workInstId, task.flowId);
 
                     String jobIdFromDelay = ShuyunApi.extractJobIdFromDelayResult(delayResult);
+                    appendLog("延期判断jobId_ID: " + jobIdFromDelay);
 
                     // 【核心】与易语言一致：两种审核都执行（无条件先后调用）
                     // 只要不是超频工单，就调用两种审核
@@ -892,13 +894,13 @@ public class ShuyunAuditFragment extends Fragment {
 
         new Thread(() -> {
             try {
-                // 延期判断获取 jobId_ID
-                String delayResult = ShuyunApi.checkDelay(pcToken,
+                // 延期判断获取 jobId_ID（省监控回单也使用省级审核的userId）
+                String delayResult = ShuyunApi.checkDelayForProvince(pcToken,
                     task.orderNum, task.jobInstId, task.relaType,
                     task.flowInstId, task.jobId, task.workInstId, task.flowId);
 
                 String jobIdFromDelay = ShuyunApi.extractJobIdFromDelayResult(delayResult);
-                appendLog("延期判断 jobId: " + jobIdFromDelay);
+                appendLog("延期判断 jobId_ID: " + jobIdFromDelay);
 
                 // 【核心修正】与易语言一致：两种审核都执行（无条件先后调用）
                 boolean normalSuccess = false;

@@ -1110,7 +1110,7 @@ public class ShuyunApi {
     }
 
     /**
-     * 延期判断接口
+     * 延期判断接口（市级审核用）
      * @param pcToken PC端登录Token
      * @param orderNum 工单编号
      * @param jobInstId 任务实例ID
@@ -1123,6 +1123,31 @@ public class ShuyunApi {
      */
     public static String checkDelay(String pcToken, String orderNum, String jobInstId,
             String relaType, String flowInstId, String jobId, String workInstId, String flowId) {
+        return checkDelayWithUserId(pcToken, orderNum, jobInstId, relaType, flowInstId, jobId, workInstId, flowId, CITY_AUDIT_USER_ID);
+    }
+
+    /**
+     * 延期判断接口（省级审核用）
+     * @param pcToken PC端登录Token
+     * @param orderNum 工单编号
+     * @param jobInstId 任务实例ID
+     * @param relaType 关联类型
+     * @param flowInstId 流程实例ID
+     * @param jobId 任务ID
+     * @param workInstId 工作实例ID
+     * @param flowId 流程ID
+     * @return 延期判断结果JSON
+     */
+    public static String checkDelayForProvince(String pcToken, String orderNum, String jobInstId,
+            String relaType, String flowInstId, String jobId, String workInstId, String flowId) {
+        return checkDelayWithUserId(pcToken, orderNum, jobInstId, relaType, flowInstId, jobId, workInstId, flowId, PROVINCE_AUDIT_USER_ID);
+    }
+
+    /**
+     * 延期判断接口（通用）
+     */
+    private static String checkDelayWithUserId(String pcToken, String orderNum, String jobInstId,
+            String relaType, String flowInstId, String jobId, String workInstId, String flowId, String userId) {
         String url = PC_BASE + "/api/flowable/orderInfo/showWorkInfo";
 
         String post = "{\"orderNum\":\"" + orderNum + "\","
@@ -1133,7 +1158,7 @@ public class ShuyunApi {
                 + "\"workInstId\":\"" + workInstId + "\","
                 + "\"workType\":\"D\","
                 + "\"flowId\":\"" + flowId + "\","
-                + "\"userId\":\"" + CITY_AUDIT_USER_ID + "\","
+                + "\"userId\":\"" + userId + "\","
                 + "\"requireId\":\"" + orderNum + "\","
                 + "\"gotoType\":\"taskTodo\"}";
 
