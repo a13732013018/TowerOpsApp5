@@ -504,6 +504,11 @@ public class ShuyunMonitorFragment extends Fragment {
                     Session s = Session.get();
                     s.shuyunAppToken = appToken;
                     s.shuyunAppUserId = appUserId;
+                    // 保存当前登录账号的IMEI（用于省级审核权限验证）
+                    ShuyunAccountConfig.Account account = ShuyunAccountConfig.getAPPAccount(selectedAppAccountIndex);
+                    if (account != null) {
+                        s.shuyunAppImei = account.imei;
+                    }
                     s.saveShuyunLogin(getContext());
 
                     mainHandler.post(() -> {

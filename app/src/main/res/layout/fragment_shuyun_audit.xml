@@ -105,7 +105,8 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:gravity="center">
+            android:gravity="center"
+            android:layout_marginBottom="8dp">
 
             <Button
                 android:id="@+id/btnCityAudit"
@@ -119,6 +120,36 @@
 
             <Button
                 android:id="@+id/btnStopCityAudit"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="10dp"
+                android:text="停止"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#EF4444"
+                android:enabled="false" />
+        </LinearLayout>
+
+        <!-- 省级审核按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center">
+
+            <Button
+                android:id="@+id/btnProvinceAudit"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="开始省级审核"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#10B981" />
+
+            <Button
+                android:id="@+id/btnStopProvinceAudit"
                 android:layout_width="0dp"
                 android:layout_height="36dp"
                 android:layout_weight="1"
@@ -175,9 +206,9 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="• 省级审核：省公司审批（需开发者权限）"
+                android:text="• 省级审核（绿色）：省公司审批（需开发者权限）"
                 android:textSize="10sp"
-                android:textColor="#9CA3AF"
+                android:textColor="#10B981"
                 android:layout_marginBottom="1dp" />
 
             <TextView
@@ -189,7 +220,7 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- 市级已办列表（显示前3条） -->
+    <!-- 市级已办列表（显示前3条，可点击） -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -198,14 +229,45 @@
         android:layout_marginTop="6dp"
         android:padding="8dp">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="市级已办（最近3条）"
-            android:textSize="11sp"
-            android:textColor="#059669"
-            android:textStyle="bold"
-            android:layout_marginBottom="4dp" />
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="市级已办（最近3条）"
+                android:textSize="11sp"
+                android:textColor="#059669"
+                android:textStyle="bold" />
+
+            <!-- 省监控审核回单按钮 -->
+            <Button
+                android:id="@+id/btnProvinceMonitorAudit"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:text="省监控回单"
+                android:textSize="10sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#EF4444"
+                android:paddingLeft="8dp"
+                android:paddingRight="8dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp" />
+        </LinearLayout>
+
+        <!-- 可点击的已办列表 -->
+        <ListView
+            android:id="@+id/lvCityFinishedList"
+            android:layout_width="match_parent"
+            android:layout_height="80dp"
+            android:layout_marginTop="4dp"
+            android:divider="#059669"
+            android:dividerHeight="1dp"
+            android:scrollbars="vertical" />
 
         <TextView
             android:id="@+id/tvCityFinishedList"

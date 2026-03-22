@@ -72,6 +72,11 @@ public class Session {
     public volatile String shuyunAppUserId = "";
 
     /**
+     * 数运APP登录IMEI（用于省级审核权限验证）
+     */
+    public volatile String shuyunAppImei = "";
+
+    /**
      * 数运PC端登录token
      */
     public volatile String shuyunPcToken = "";
@@ -115,6 +120,7 @@ public class Session {
     // ---------- 数运登录信息持久化Key ----------
     private static final String KEY_SHUYUN_APP_TOKEN = "shuyun_app_token";
     private static final String KEY_SHUYUN_APP_USERID = "shuyun_app_userid";
+    private static final String KEY_SHUYUN_APP_IMEI = "shuyun_app_imei";
     private static final String KEY_SHUYUN_PC_TOKEN = "shuyun_pc_token";
     private static final String KEY_SHUYUN_PC_IP = "shuyun_pc_ip";
     private static final String KEY_SHUYUN_CITY_AREA = "shuyun_city_area";
@@ -159,6 +165,7 @@ public class Session {
            .edit()
            .putString(KEY_SHUYUN_APP_TOKEN, shuyunAppToken)
            .putString(KEY_SHUYUN_APP_USERID, shuyunAppUserId)
+           .putString(KEY_SHUYUN_APP_IMEI, shuyunAppImei)
            .putString(KEY_SHUYUN_PC_TOKEN, shuyunPcToken)
            .putString(KEY_SHUYUN_PC_IP, shuyunPcIp)
            .putString(KEY_SHUYUN_CITY_AREA, shuyunCityArea)
@@ -194,6 +201,7 @@ public class Session {
         if (!savedShuyunAppToken.isEmpty()) {
             shuyunAppToken = savedShuyunAppToken;
             shuyunAppUserId = sp.getString(KEY_SHUYUN_APP_USERID, shuyunAppUserId);
+            shuyunAppImei = sp.getString(KEY_SHUYUN_APP_IMEI, shuyunAppImei);
         }
 
         String savedShuyunPcToken = sp.getString(KEY_SHUYUN_PC_TOKEN, "");

@@ -1,5 +1,7 @@
 package com.towerops.app.ui;
 
+import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -16,7 +18,11 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import com.towerops.app.R;
 import com.towerops.app.api.ShuyunApi;
@@ -38,8 +44,20 @@ public class ShuyunAuditFragment extends Fragment {
     private TextView tvCountyStatus, tvAuditLog, tvCityFinishedList;
     private Button btnCountyAudit, btnStopCountyAudit;
     private Button btnCityAudit, btnStopCityAudit;
+    private Button btnProvinceAudit, btnStopProvinceAudit;
+    private Button btnProvinceMonitorAudit;
     private Spinner spinnerCounty;
     private ScrollView svAuditLog;
+    private android.widget.ListView lvCityFinishedList;
+
+    // 省级审核开发者权限IMEI
+    private static final String PROVINCE_AUTH_IMEI = "ba9f03beaacd4c05";
+
+    // 选中的市级已办工单
+    private ShuyunApi.CountyTaskInfo selectedCityFinishedTask = null;
+
+    // 市级已办工单列表（用于ListView显示）
+    private List<ShuyunApi.CountyTaskInfo> cityFinishedTaskList = new ArrayList<>();
 
     // 区县经理代号（县级审核用）
     private static final String[] COUNTY_CODES = {"36745", "31950"};
@@ -55,8 +73,10 @@ public class ShuyunAuditFragment extends Fragment {
     // 审核状态
     private volatile boolean isCountyRunning = false;
     private volatile boolean isCityRunning = false;
+    private volatile boolean isProvinceRunning = false;
     private Thread countyThread;
     private Thread cityThread;
+    private Thread provinceThread;
     private int selectedCountyIndex = 0;
     private int selectedCityAreaIndex = 0;
 
@@ -112,10 +132,14 @@ public class ShuyunAuditFragment extends Fragment {
         btnStopCountyAudit = view.findViewById(R.id.btnStopCountyAudit);
         btnCityAudit = view.findViewById(R.id.btnCityAudit);
         btnStopCityAudit = view.findViewById(R.id.btnStopCityAudit);
+        btnProvinceAudit = view.findViewById(R.id.btnProvinceAudit);
+        btnStopProvinceAudit = view.findViewById(R.id.btnStopProvinceAudit);
+        btnProvinceMonitorAudit = view.findViewById(R.id.btnProvinceMonitorAudit);
 
         spinnerCounty = view.findViewById(R.id.spinnerCounty);
         svAuditLog = view.findViewById(R.id.svAuditLog);
         tvCityFinishedList = view.findViewById(R.id.tvCityFinishedList);
+        lvCityFinishedList = view.findViewById(R.id.lvCityFinishedList);
 
         // 初始化区县选择器（县级审核用）
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
@@ -133,6 +157,15 @@ public class ShuyunAuditFragment extends Fragment {
                 }
             }
         }
+
+        // 市级已办列表点击事件
+        lvCityFinishedList.setOnItemClickListener((parent, view, position, id) -> {
+            if (cityFinishedTaskList != null && position < cityFinishedTaskList.size()) {
+                selectedCityFinishedTask = cityFinishedTaskList.get(position);
+                String jobName = selectedCityFinishedTask.jobName != null ? selectedCityFinishedTask.jobName : "";
+                Toast.makeText(getContext(), "已选择: " + selectedCityFinishedTask.station_name + " [" + jobName + "]", Toast.LENGTH_SHORT).show();
+            }
+        });
 
         updateStatus("未启动");
     }
@@ -163,6 +196,15 @@ public class ShuyunAuditFragment extends Fragment {
 
         // 停止市级审核
         btnStopCityAudit.setOnClickListener(v -> stopCityAudit());
+
+        // 开始省级审核
+        btnProvinceAudit.setOnClickListener(v -> startProvinceAudit());
+
+        // 停止省级审核
+        btnStopProvinceAudit.setOnClickListener(v -> stopProvinceAudit());
+
+        // 省监控审核回单
+        btnProvinceMonitorAudit.setOnClickListener(v -> doProvinceMonitorAudit());
     }
 
     private void updateStatus(String status) {
@@ -491,23 +533,428 @@ public class ShuyunAuditFragment extends Fragment {
         }
     }
 
+    // ==================== 省级审核 ====================
     /**
-     * 更新市级已办列表显示（显示前5条）
+     * 获取设备IMEI/序列号
+     */
+    private String getDeviceId() {
+        try {
+            Context context = getContext();
+            if (context == null) return "";
+            android.telephony.TelephonyManager tm = (android.telephony.TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
+            if (tm != null) {
+                String imei = tm.getDeviceId();
+                if (imei != null && !imei.isEmpty()) {
+                    return imei;
+                }
+            }
+            // 备用：获取Android ID
+            String androidId = android.provider.Settings.Secure.getString(context.getContentResolver(), android.provider.Settings.Secure.ANDROID_ID);
+            return androidId != null ? androidId : "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    /**
+     * 启动省级审核
+     */
+    private void startProvinceAudit() {
+        // 优先从 Session 获取登录信息
+        Session s = Session.get();
+        if (s.shuyunPcToken != null && !s.shuyunPcToken.isEmpty()) {
+            pcToken = s.shuyunPcToken;
+        } else if (callback != null) {
+            pcToken = callback.getPcToken();
+        }
+
+        if (pcToken == null || pcToken.isEmpty()) {
+            Toast.makeText(getContext(), "请先在监控页面登录PC端", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (isProvinceRunning) {
+            Toast.makeText(getContext(), "省级审核已在运行中", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // IMEI权限验证：从Session中获取APP登录时保存的imei
+        String loginImei = s.shuyunAppImei;
+        if (loginImei == null || loginImei.isEmpty()) {
+            Toast.makeText(getContext(), "请先在监控页面登录APP端获取权限", Toast.LENGTH_SHORT).show();
+            appendLog("省级审核：请先登录APP端");
+            return;
+        }
+        if (!PROVINCE_AUTH_IMEI.equalsIgnoreCase(loginImei)) {
+            Toast.makeText(getContext(), "无省级审核权限，需联系开发者", Toast.LENGTH_LONG).show();
+            appendLog("省级审核：无权限 (IMEI不匹配)");
+            return;
+        }
+
+        // 使用当前选择的区县代码
+        selectedCityAreaIndex = selectedCountyIndex;
+        String cityAreaCode = CITY_AREA_CODES[selectedCityAreaIndex];
+
+        // 先获取待审核工单数量
+        appendLog("正在获取省级待审核工单...");
+        String jsonStr = ShuyunApi.getProvinceTaskList(pcToken, cityAreaCode);
+        List<ShuyunApi.CountyTaskInfo> taskList = ShuyunApi.parseCountyTaskList(jsonStr);
+
+        if (taskList.isEmpty()) {
+            Toast.makeText(getContext(), "省级待审核工单为空", Toast.LENGTH_SHORT).show();
+            appendLog("省级待审核工单为空");
+            return;
+        }
+
+        // 构建工单信息用于确认对话框
+        StringBuilder taskInfo = new StringBuilder();
+        int count = Math.min(taskList.size(), 10);
+        for (int i = 0; i < count; i++) {
+            ShuyunApi.CountyTaskInfo task = taskList.get(i);
+            taskInfo.append(i + 1).append(". ").append(task.station_name);
+            if (task.orderNum != null && !task.orderNum.isEmpty()) {
+                taskInfo.append(" (").append(task.orderNum).append(")");
+            }
+            taskInfo.append("\n");
+        }
+        if (taskList.size() > 10) {
+            taskInfo.append("... 共").append(taskList.size()).append("条");
+        }
+
+        // 弹出确认对话框
+        new AlertDialog.Builder(requireContext())
+                .setTitle("省级审核确认")
+                .setMessage("发现 " + taskList.size() + " 条待审核工单：\n\n" + taskInfo.toString() + "\n是否确认审核？")
+                .setPositiveButton("确认审核", (dialog, which) -> {
+                    // 用户确认后开始审核
+                    performProvinceAudit(taskList, cityAreaCode);
+                })
+                .setNegativeButton("取消", (dialog, which) -> {
+                    appendLog("省级审核已取消");
+                })
+                .show();
+    }
+
+    /**
+     * 执行省级审核
+     */
+    private void performProvinceAudit(List<ShuyunApi.CountyTaskInfo> taskList, String cityAreaCode) {
+        appendLog("省级审核已启动，区县: " + CITY_AREA_NAMES[selectedCityAreaIndex] + "(" + cityAreaCode + ")");
+        appendLog("待审核工单: " + taskList.size() + " 个");
+
+        isProvinceRunning = true;
+        btnProvinceAudit.setEnabled(false);
+        btnProvinceAudit.setText("省级审核中");
+        btnStopProvinceAudit.setEnabled(true);
+        updateStatus("省级审核中...");
+
+        provinceThread = new Thread(() -> {
+            try {
+                for (int i = 0; i < taskList.size() && isProvinceRunning; i++) {
+                    ShuyunApi.CountyTaskInfo task = taskList.get(i);
+
+                    // 跳过"超频告警整治工单"（与易语言一致）
+                    if ("超频告警整治工单".equals(task.flowName)) {
+                        appendLog("跳过: " + task.station_name + " (超频工单)");
+                        continue;
+                    }
+
+                    // 仿生延迟：基础1-3秒
+                    int delayMs = (int) (Math.random() * 2000) + 1000;
+                    final int delay = delayMs;
+
+                    final int currentIndex = i;
+                    mainHandler.post(() -> {
+                        updateStatus("审核中 " + (currentIndex + 1) + "/" + taskList.size());
+                    });
+
+                    // 添加等待日志
+                    appendLog("等待 " + delay / 1000 + " 秒后审核: " + task.station_name);
+
+                    try {
+                        Thread.sleep(delay);
+                    } catch (InterruptedException e) {
+                        break;
+                    }
+
+                    if (!isProvinceRunning) break;
+
+                    // 延期判断（与市级审核相同）
+                    String delayResult = ShuyunApi.checkDelay(pcToken,
+                        task.orderNum, task.jobInstId, task.relaType,
+                        task.flowInstId, task.jobId, task.workInstId, task.flowId);
+
+                    String delayType = ShuyunApi.parseDelayResult(delayResult);
+                    String jobIdFromDelay = ShuyunApi.extractJobIdFromDelayResult(delayResult);
+
+                    // 提交审核：两种都尝试
+                    String result = "";
+                    boolean auditSuccess = false;
+
+                    if ("省监控审核".equals(delayType)) {
+                        // 延期审核优先
+                        result = ShuyunApi.submitProvinceDelayAudit(pcToken,
+                            task.orderNum, task.jobInstId, task.flowInstId,
+                            task.jobId, task.workInstId, task.flowId, jobIdFromDelay);
+
+                        if (ShuyunApi.isSuccess(result)) {
+                            auditSuccess = true;
+                        } else {
+                            // 延期审核失败，尝试普通审核
+                            result = ShuyunApi.submitProvinceAudit(pcToken,
+                                task.orderNum, task.jobInstId, task.flowInstId,
+                                task.jobId, task.workInstId, task.flowId, jobIdFromDelay);
+                            auditSuccess = ShuyunApi.isSuccess(result);
+                        }
+                    } else {
+                        // 普通审核优先
+                        result = ShuyunApi.submitProvinceAudit(pcToken,
+                            task.orderNum, task.jobInstId, task.flowInstId,
+                            task.jobId, task.workInstId, task.flowId, jobIdFromDelay);
+
+                        if (ShuyunApi.isSuccess(result)) {
+                            auditSuccess = true;
+                        } else {
+                            // 普通审核失败，尝试延期审核
+                            result = ShuyunApi.submitProvinceDelayAudit(pcToken,
+                                task.orderNum, task.jobInstId, task.flowInstId,
+                                task.jobId, task.workInstId, task.flowId, jobIdFromDelay);
+                            auditSuccess = ShuyunApi.isSuccess(result);
+                        }
+                    }
+
+                    // 最终结果
+                    if (auditSuccess) {
+                        appendLog("✓ [" + (currentIndex + 1) + "/" + taskList.size() + "] 通过: " + task.station_name);
+                    } else {
+                        appendLog("✗ [" + (currentIndex + 1) + "/" + taskList.size() + "] 失败: " + task.station_name);
+                    }
+                }
+            } catch (Exception e) {
+                appendLog("省级审核异常: " + e.getMessage());
+            }
+
+            // 审核结束
+            mainHandler.post(() -> {
+                isProvinceRunning = false;
+                btnProvinceAudit.setEnabled(true);
+                btnProvinceAudit.setText("开始省级审核");
+                btnStopProvinceAudit.setEnabled(false);
+                updateStatus("已完成");
+                appendLog("省级审核已完成");
+            });
+        });
+        provinceThread.start();
+    }
+
+    private void stopProvinceAudit() {
+        isProvinceRunning = false;
+        if (provinceThread != null) {
+            provinceThread.interrupt();
+        }
+    }
+
+    /**
+     * 省监控审核回单（对已选择的市级已办工单进行归档）
+     */
+    private void doProvinceMonitorAudit() {
+        // 检查是否选择了工单
+        if (selectedCityFinishedTask == null) {
+            Toast.makeText(getContext(), "请先点击选择列表中的工单", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 检查当前环节是否是省监控审核
+        String jobName = selectedCityFinishedTask.jobName;
+        if (jobName == null || !jobName.contains("省监控")) {
+            Toast.makeText(getContext(), "该工单当前环节不是省监控审核，无法回单", Toast.LENGTH_SHORT).show();
+            appendLog("省监控回单失败：当前环节 [" + jobName + "] 不是省监控审核");
+            return;
+        }
+
+        // 检查权限
+        Session s = Session.get();
+        String loginImei = s.shuyunAppImei;
+        if (loginImei == null || loginImei.isEmpty()) {
+            Toast.makeText(getContext(), "请先在监控页面登录APP端获取权限", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        if (!PROVINCE_AUTH_IMEI.equalsIgnoreCase(loginImei)) {
+            Toast.makeText(getContext(), "无回单权限，需联系开发者", Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        // 检查PC端登录
+        if (s.shuyunPcToken != null && !s.shuyunPcToken.isEmpty()) {
+            pcToken = s.shuyunPcToken;
+        } else if (callback != null) {
+            pcToken = callback.getPcToken();
+        }
+
+        if (pcToken == null || pcToken.isEmpty()) {
+            Toast.makeText(getContext(), "请先在监控页面登录PC端", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 确认对话框
+        new AlertDialog.Builder(requireContext())
+                .setTitle("省监控审核回单确认")
+                .setMessage("确认对以下工单进行省监控审核归档？\n\n站点：" + selectedCityFinishedTask.station_name + "\n环节：" + jobName + "\n工单号：" + selectedCityFinishedTask.orderNum)
+                .setPositiveButton("确认回单", (dialog, which) -> {
+                    performProvinceMonitorAudit(selectedCityFinishedTask);
+                })
+                .setNegativeButton("取消", null)
+                .show();
+    }
+
+    /**
+     * 执行省监控审核回单
+     */
+    private void performProvinceMonitorAudit(ShuyunApi.CountyTaskInfo task) {
+        appendLog("开始省监控回单: " + task.station_name);
+
+        new Thread(() -> {
+            try {
+                // 延期判断
+                String delayResult = ShuyunApi.checkDelay(pcToken,
+                    task.orderNum, task.jobInstId, task.relaType,
+                    task.flowInstId, task.jobId, task.workInstId, task.flowId);
+
+                String delayType = ShuyunApi.parseDelayResult(delayResult);
+                String jobIdFromDelay = ShuyunApi.extractJobIdFromDelayResult(delayResult);
+
+                // 尝试两种审核方式
+                String result = "";
+                boolean auditSuccess = false;
+
+                if ("省监控审核".equals(delayType)) {
+                    // 延期审核优先
+                    result = ShuyunApi.submitProvinceDelayAudit(pcToken,
+                        task.orderNum, task.jobInstId, task.flowInstId,
+                        task.jobId, task.workInstId, task.flowId, jobIdFromDelay);
+
+                    if (ShuyunApi.isSuccess(result)) {
+                        auditSuccess = true;
+                    } else {
+                        // 延期审核失败，尝试普通审核
+                        result = ShuyunApi.submitProvinceAudit(pcToken,
+                            task.orderNum, task.jobInstId, task.flowInstId,
+                            task.jobId, task.workInstId, task.flowId, jobIdFromDelay);
+                        auditSuccess = ShuyunApi.isSuccess(result);
+                    }
+                } else {
+                    // 普通审核优先
+                    result = ShuyunApi.submitProvinceAudit(pcToken,
+                        task.orderNum, task.jobInstId, task.flowInstId,
+                        task.jobId, task.workInstId, task.flowId, jobIdFromDelay);
+
+                    if (ShuyunApi.isSuccess(result)) {
+                        auditSuccess = true;
+                    } else {
+                        // 普通审核失败，尝试延期审核
+                        result = ShuyunApi.submitProvinceDelayAudit(pcToken,
+                            task.orderNum, task.jobInstId, task.flowInstId,
+                            task.jobId, task.workInstId, task.flowId, jobIdFromDelay);
+                        auditSuccess = ShuyunApi.isSuccess(result);
+                    }
+                }
+
+                if (auditSuccess) {
+                    appendLog("✓ 省监控回单成功: " + task.station_name);
+                    mainHandler.post(() -> {
+                        Toast.makeText(getContext(), "回单成功: " + task.station_name, Toast.LENGTH_SHORT).show();
+                        selectedCityFinishedTask = null;
+                        // 刷新已办列表
+                        refreshCityFinishedList();
+                    });
+                } else {
+                    appendLog("✗ 省监控回单失败: " + task.station_name);
+                    mainHandler.post(() -> {
+                        Toast.makeText(getContext(), "回单失败: " + task.station_name, Toast.LENGTH_SHORT).show();
+                    });
+                }
+            } catch (Exception e) {
+                appendLog("省监控回单异常: " + e.getMessage());
+                mainHandler.post(() -> {
+                    Toast.makeText(getContext(), "回单异常: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+            }
+        }).start();
+    }
+
+    /**
+     * 刷新市级已办列表
+     */
+    private void refreshCityFinishedList() {
+        Session s = Session.get();
+        if (s.shuyunPcToken != null && !s.shuyunPcToken.isEmpty()) {
+            pcToken = s.shuyunPcToken;
+        }
+
+        if (pcToken == null || pcToken.isEmpty()) {
+            return;
+        }
+
+        String cityAreaCode = CITY_AREA_CODES[selectedCountyIndex];
+        new Thread(() -> {
+            try {
+                String finishedJson = ShuyunApi.getCityFinishedList(pcToken, cityAreaCode);
+                List<ShuyunApi.CountyTaskInfo> finishedList = ShuyunApi.parseCountyTaskList(finishedJson);
+                updateCityFinishedList(finishedList);
+            } catch (Exception e) {
+                // 忽略
+            }
+        }).start();
+    }
+
+    /**
+     * 更新市级已办列表显示（显示前3条，带当前环节）
      */
     private void updateCityFinishedList(List<ShuyunApi.CountyTaskInfo> finishedList) {
+        // 保存列表数据
+        cityFinishedTaskList = finishedList != null ? finishedList : new ArrayList<>();
+
         mainHandler.post(() -> {
-            if (finishedList == null || finishedList.isEmpty()) {
+            if (cityFinishedTaskList.isEmpty()) {
                 tvCityFinishedList.setText("暂无已办记录");
+                lvCityFinishedList.setAdapter(null);
                 return;
             }
 
-            StringBuilder sb = new StringBuilder();
-            int count = Math.min(finishedList.size(), 3);
+            // 更新ListView
+            List<String> displayList = new ArrayList<>();
+            int count = Math.min(cityFinishedTaskList.size(), 3);
             for (int i = 0; i < count; i++) {
-                ShuyunApi.CountyTaskInfo task = finishedList.get(i);
+                ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
+                StringBuilder sb = new StringBuilder();
                 sb.append(i + 1).append(". ").append(task.station_name);
+                // 先显示工单号
                 if (task.orderNum != null && !task.orderNum.isEmpty()) {
                     sb.append(" (").append(task.orderNum).append(")");
+                }
+                // 后显示当前环节
+                if (task.jobName != null && !task.jobName.isEmpty()) {
+                    sb.append(" [").append(task.jobName).append("]");
+                }
+                displayList.add(sb.toString());
+            }
+
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
+                    android.R.layout.simple_list_item_1, displayList);
+            lvCityFinishedList.setAdapter(adapter);
+
+            // 同时更新TextView（保留兼容性）
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < count; i++) {
+                ShuyunApi.CountyTaskInfo task = cityFinishedTaskList.get(i);
+                sb.append(i + 1).append(". ").append(task.station_name);
+                // 先显示工单号
+                if (task.orderNum != null && !task.orderNum.isEmpty()) {
+                    sb.append(" (").append(task.orderNum).append(")");
+                }
+                // 后显示当前环节
+                if (task.jobName != null && !task.jobName.isEmpty()) {
+                    sb.append(" [").append(task.jobName).append("]");
                 }
                 if (i < count - 1) {
                     sb.append("\n");
@@ -533,18 +980,17 @@ public class ShuyunAuditFragment extends Fragment {
      */
     private void showCountdown(String prefix, int totalMs) {
         final int[] remainingSecs = {totalMs / 1000};
-        // 立即显示第一条
-        mainHandler.post(() -> updateStatus(prefix + remainingSecs[0] + "秒"));
+        // 立即显示第一条（只在日志中显示，不在状态栏显示）
         appendLog(prefix + remainingSecs[0] + "秒");
 
-        // 每秒更新一次
+        // 每秒更新一次日志
         final Runnable[] countdownRunnable = {null};
         countdownRunnable[0] = new Runnable() {
             @Override
             public void run() {
                 if (remainingSecs[0] > 0) {
                     remainingSecs[0]--;
-                    mainHandler.post(() -> updateStatus(prefix + remainingSecs[0] + "秒"));
+                    appendLog(prefix + remainingSecs[0] + "秒");
                     mainHandler.postDelayed(this, 1000);
                 }
             }
@@ -566,5 +1012,6 @@ public class ShuyunAuditFragment extends Fragment {
         super.onDestroyView();
         stopCountyAudit();
         stopCityAudit();
+        stopProvinceAudit();
     }
 }
