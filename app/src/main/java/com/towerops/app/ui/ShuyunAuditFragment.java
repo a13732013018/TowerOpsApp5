@@ -90,6 +90,16 @@ public class ShuyunAuditFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // 恢复登录状态
+        Session s = Session.get();
+        s.loadConfig(requireContext());
+
+        // 如果Session中已有登录信息，直接使用
+        if (!s.shuyunPcToken.isEmpty()) {
+            pcToken = s.shuyunPcToken;
+        }
+
         initViews(view);
         setupListeners();
     }

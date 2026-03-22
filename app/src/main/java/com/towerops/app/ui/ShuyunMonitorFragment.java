@@ -137,9 +137,30 @@ public class ShuyunMonitorFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+
+        // 恢复登录状态
+        Session s = Session.get();
+        s.loadConfig(requireContext());
+
+        // 从Session恢复登录状态
+        if (!s.shuyunPcToken.isEmpty()) {
+            pcToken = s.shuyunPcToken;
+            pcIp = s.shuyunPcIp;
+            isPcLoggedIn = true;
+        }
+        if (!s.shuyunAppToken.isEmpty()) {
+            appToken = s.shuyunAppToken;
+            appUserId = s.shuyunAppUserId;
+            isAppLoggedIn = true;
+        }
+
         initViews(view);
         setupListeners();
         setupTimeUpdate();
+
+        // 更新登录状态显示
+        updateLoginStatus();
+
         loadCaptcha();
     }
 
@@ -417,10 +438,11 @@ public class ShuyunMonitorFragment extends Fragment {
                     pcIp = currentPcIp;
                     isPcLoggedIn = true;
 
-                    // 保存到Session
+                    // 保存到Session并持久化
                     Session s = Session.get();
                     s.shuyunPcToken = pcToken;
                     s.shuyunPcIp = pcIp;
+                    s.saveShuyunLogin(getContext());
 
                     mainHandler.post(() -> {
                         updateLoginStatus();
@@ -478,10 +500,11 @@ public class ShuyunMonitorFragment extends Fragment {
                     appUserId = loginResult.userId;
                     isAppLoggedIn = true;
 
-                    // 保存到Session
+                    // 保存到Session并持久化
                     Session s = Session.get();
                     s.shuyunAppToken = appToken;
                     s.shuyunAppUserId = appUserId;
+                    s.saveShuyunLogin(getContext());
 
                     mainHandler.post(() -> {
                         updateLoginStatus();

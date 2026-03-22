@@ -112,6 +112,14 @@ public class Session {
     private static final String KEY_USERNAME    = "username";
     private static final String KEY_REALNAME    = "realname";
 
+    // ---------- 数运登录信息持久化Key ----------
+    private static final String KEY_SHUYUN_APP_TOKEN = "shuyun_app_token";
+    private static final String KEY_SHUYUN_APP_USERID = "shuyun_app_userid";
+    private static final String KEY_SHUYUN_PC_TOKEN = "shuyun_pc_token";
+    private static final String KEY_SHUYUN_PC_IP = "shuyun_pc_ip";
+    private static final String KEY_SHUYUN_CITY_AREA = "shuyun_city_area";
+    private static final String KEY_COUNTY_MANAGER_CODE = "county_manager_code";
+
     /**
      * 将 appConfig 持久化到 SharedPreferences。
      * 在 MainActivity.buildConfig() 写入 appConfig 后立刻调用。
@@ -142,6 +150,23 @@ public class Session {
     }
 
     /**
+     * 保存数运登录信息（PC端和APP端token）
+     * 在数运登录成功后调用
+     */
+    public void saveShuyunLogin(Context ctx) {
+        ctx.getApplicationContext()
+           .getSharedPreferences(PREF_SESSION, Context.MODE_PRIVATE)
+           .edit()
+           .putString(KEY_SHUYUN_APP_TOKEN, shuyunAppToken)
+           .putString(KEY_SHUYUN_APP_USERID, shuyunAppUserId)
+           .putString(KEY_SHUYUN_PC_TOKEN, shuyunPcToken)
+           .putString(KEY_SHUYUN_PC_IP, shuyunPcIp)
+           .putString(KEY_SHUYUN_CITY_AREA, shuyunCityArea)
+           .putString(KEY_COUNTY_MANAGER_CODE, countyManagerCode)
+           .apply();
+    }
+
+    /**
      * 从 SharedPreferences 恢复 appConfig 和登录凭据（服务重建/进程恢复时调用）。
      * 若 prefs 里没有，对应字段保持原值不变。
      */
@@ -162,6 +187,30 @@ public class Session {
             mobilephone = sp.getString(KEY_MOBILE,    mobilephone);
             username    = sp.getString(KEY_USERNAME,  username);
             realname    = sp.getString(KEY_REALNAME,  realname);
+        }
+
+        // 恢复数运登录信息
+        String savedShuyunAppToken = sp.getString(KEY_SHUYUN_APP_TOKEN, "");
+        if (!savedShuyunAppToken.isEmpty()) {
+            shuyunAppToken = savedShuyunAppToken;
+            shuyunAppUserId = sp.getString(KEY_SHUYUN_APP_USERID, shuyunAppUserId);
+        }
+
+        String savedShuyunPcToken = sp.getString(KEY_SHUYUN_PC_TOKEN, "");
+        if (!savedShuyunPcToken.isEmpty()) {
+            shuyunPcToken = savedShuyunPcToken;
+            shuyunPcIp = sp.getString(KEY_SHUYUN_PC_IP, shuyunPcIp);
+        }
+
+        // 恢复配置信息
+        String savedCityArea = sp.getString(KEY_SHUYUN_CITY_AREA, "");
+        if (!savedCityArea.isEmpty()) {
+            shuyunCityArea = savedCityArea;
+        }
+
+        String savedCountyCode = sp.getString(KEY_COUNTY_MANAGER_CODE, "");
+        if (!savedCountyCode.isEmpty()) {
+            countyManagerCode = savedCountyCode;
         }
     }
 

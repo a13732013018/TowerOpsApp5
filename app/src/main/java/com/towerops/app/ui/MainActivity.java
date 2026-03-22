@@ -157,6 +157,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        // 恢复登录状态（APP和数运的token等）
+        Session.get().loadConfig(this);
+
         bindViews();
         setupRecycler();
         setupConfigWatchers();
