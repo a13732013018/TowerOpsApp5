@@ -35,7 +35,7 @@ public class ShuyunAuditFragment extends Fragment {
     private static final String TAG = "ShuyunAuditFragment";
 
     // UI控件
-    private TextView tvCountyStatus, tvAuditLog;
+    private TextView tvCountyStatus, tvAuditLog, tvCityFinishedList;
     private Button btnCountyAudit, btnStopCountyAudit;
     private Button btnCityAudit, btnStopCityAudit;
     private Spinner spinnerCounty;
@@ -115,6 +115,7 @@ public class ShuyunAuditFragment extends Fragment {
 
         spinnerCounty = view.findViewById(R.id.spinnerCounty);
         svAuditLog = view.findViewById(R.id.svAuditLog);
+        tvCityFinishedList = view.findViewById(R.id.tvCityFinishedList);
 
         // 初始化区县选择器（县级审核用）
         ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(),
@@ -443,6 +444,9 @@ public class ShuyunAuditFragment extends Fragment {
                         List<ShuyunApi.CountyTaskInfo> finishedList = ShuyunApi.parseCountyTaskList(finishedJson);
                         appendLog("市级已办: " + finishedList.size() + " 条");
 
+                        // 显示前5条到已办列表区域
+                        updateCityFinishedList(finishedList);
+
                         int sleepTime = (int) (Math.random() * 50000) + 50000;
                         appendLog("等待 " + sleepTime / 1000 + " 秒后下一轮...");
                         Thread.sleep(sleepTime);
@@ -478,6 +482,32 @@ public class ShuyunAuditFragment extends Fragment {
         if (cityThread != null) {
             cityThread.interrupt();
         }
+    }
+
+    /**
+     * 更新市级已办列表显示（显示前5条）
+     */
+    private void updateCityFinishedList(List<ShuyunApi.CountyTaskInfo> finishedList) {
+        mainHandler.post(() -> {
+            if (finishedList == null || finishedList.isEmpty()) {
+                tvCityFinishedList.setText("暂无已办记录");
+                return;
+            }
+
+            StringBuilder sb = new StringBuilder();
+            int count = Math.min(finishedList.size(), 5);
+            for (int i = 0; i < count; i++) {
+                ShuyunApi.CountyTaskInfo task = finishedList.get(i);
+                sb.append(i + 1).append(". ").append(task.station_name);
+                if (task.orderNum != null && !task.orderNum.isEmpty()) {
+                    sb.append(" (").append(task.orderNum).append(")");
+                }
+                if (i < count - 1) {
+                    sb.append("\n");
+                }
+            }
+            tvCityFinishedList.setText(sb.toString());
+        });
     }
 
     private void appendLog(String msg) {
