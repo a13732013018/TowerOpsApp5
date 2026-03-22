@@ -702,6 +702,46 @@ public class ShuyunApi {
     }
 
     /**
+     * 县级/市级/省级审核工单列表请求头（form-urlencoded）
+     * 【核心】Authorization 和 towerNumber-Token 使用相同的值（PC登录token）
+     * @param pcToken PC登录获取的token（用于Authorization）
+     * @param cookieToken Cookie中的token（与pcToken相同）
+     */
+    private static String buildCountyApiHeader(String pcToken, String cookieToken) {
+        // 【调试】打印token前20字符用于确认
+        System.out.println("[ShuyunApi] buildCountyApiHeader pcToken: " + (pcToken != null && pcToken.length() > 20 ? pcToken.substring(0, 20) + "..." : pcToken));
+        
+        // 【核心】Cookie 中的 towerNumber-Token 使用传入的token
+        String cookie = "SECKEY_ABVK=qeTsXE4y14X4ldH40SSQ0knt0W26i4ypYTlvXF67HHk%3D; "
+                + "BMAP_SECKEY=EoXHAf-lWPqVbjSv7_4j3cQvzlEFHd7SlUSefjm50pgPvz1UqmUf_LytsQlxN5IIAmV9_J9BF1WQIi-cBbxfyrULQHvuzq1J1hHzvHTweKWcFqtisDX98VY2MG-9NaVx2TOhX_IhsFrMPk9ZeqD9BFoUHztloIcOHcK3YkM97zwnbWwajm05accu9pXnwKKW; "
+                + "sysName=%E4%BC%8A%E4%B8%96%E8%B1%AA; "
+                + "SameSite=Lax; "
+                + "Secure; "
+                + "towerNumber-Token=" + (cookieToken != null && !cookieToken.isEmpty() ? cookieToken : pcToken);
+        
+        return "Accept: application/json, text/plain, */*\n"
+                + "Accept-Encoding: gzip, deflate\n"
+                + "Accept-Language: zh-CN,zh;q=0.9\n"
+                + "Authorization: " + pcToken + "\n"
+                + "Cache-Control: no-cache\n"
+                + "Connection: keep-alive\n"
+                + "Content-Type: application/x-www-form-urlencoded;charset=UTF-8\n"
+                + "Cookie: " + cookie + "\n"
+                + "Host: zjtowercom.cn:8998\n"
+                + "Origin: http://zjtowercom.cn:8998\n"
+                + "Pragma: no-cache\n"
+                + "Referer: http://zjtowercom.cn:8998/dashboard\n"
+                + "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36";
+    }
+
+    /**
+     * 县级/市级/省级审核工单列表请求头（兼容旧版本，使用同一个token）
+     */
+    private static String buildCountyApiHeader(String pcToken) {
+        return buildCountyApiHeader(pcToken, pcToken);
+    }
+
+    /**
      * 获取工单列表 GET 请求头（与浏览器一致）
      * 【核心】Authorization 和 towerNumber-Token 使用相同的值（PC登录token）
      * @param token PC登录获取的token
@@ -1082,48 +1122,30 @@ public class ShuyunApi {
 
     /**
      * 获取省级待审核工单列表
-     * 【核心】使用 PROVINCE_AUDIT_USER_ID = 32269
+     * 【核心】使用 PROVINCE_AUDIT_USER_ID = 32269，与市级审核完全相同的请求方式
      * @param pcToken PC端登录Token（Authorization）
      * @param cookieToken PC端登录Token（Cookie中的towerNumber-Token，可为空）
      * @param cityArea 区县代码（如330326）
      * @return 工单列表JSON
      */
     public static String getProvinceTaskList(String pcToken, String cookieToken, String cityArea) {
-        // 【核心】与易语言一致：使用 PROVINCE_AUDIT_USER_ID (32269) 获取省级待办
-        String userId = PROVINCE_AUDIT_USER_ID;
-        
-        // 与易语言一致：limit=10
+        // 【核心】与市级审核完全一致：URL和body都带参数，使用POST请求（form-urlencoded）
         String url = PC_BASE + "/api/flowable/flowable/task/listTodo"
                 + "?page=1"
                 + "&limit=10"
-                + "&userId=" + userId
+                + "&userId=" + PROVINCE_AUDIT_USER_ID
                 + "&flowId=&orderType=&xmlx=&area=330300&cityArea=" + cityArea;
 
-        // 【核心】使用 POST 请求（Content-Length: 0），请求头与浏览器完全一致
-        String headers = buildTaskListHeader(pcToken);
-        
-        // 【调试日志】详细输出请求信息
-        System.out.println("[ShuyunApi] ========== 省级待办请求 ==========");
-        System.out.println("[ShuyunApi] userId: " + userId + " (PROVINCE_AUDIT_USER_ID)");
-        System.out.println("[ShuyunApi] token: " + (pcToken.length() > 20 ? pcToken.substring(0, 20) + "..." : pcToken));
-        System.out.println("[ShuyunApi] URL: " + url);
-        
+        String post = "page=1&limit=10&userId=" + PROVINCE_AUDIT_USER_ID
+                + "&flowId=&orderType=&xmlx=&area=330300&cityArea=" + cityArea;
+
+        // 【核心】使用与市级审核相同的请求头
+        String headers = buildCountyApiHeader(pcToken, cookieToken);
         try {
-            // 【核心】使用 POST 请求，但 body 为空（Content-Length: 0），与浏览器一致
-            // 使用特殊的 "__EMPTY_BODY__" 标记告诉 HttpUtil 发送空 body
-            String result = HttpUtil.post(url, "__EMPTY_BODY__", headers, null);
-            System.out.println("[ShuyunApi] Result length: " + (result != null ? result.length() : 0));
-            if (result != null && !result.isEmpty()) {
-                System.out.println("[ShuyunApi] Result preview: " + result.substring(0, Math.min(200, result.length())));
-            } else {
-                System.out.println("[ShuyunApi] Result is empty or null!");
-            }
-            System.out.println("[ShuyunApi] ========== 请求结束 ==========");
+            String result = HttpUtil.post(url, post, headers, null);
             return result != null ? result : "";
         } catch (Exception e) {
-            System.err.println("[ShuyunApi] Exception: " + e.getMessage());
             e.printStackTrace();
-            System.out.println("[ShuyunApi] ========== 请求异常结束 ==========");
             return "";
         }
     }
