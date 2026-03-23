@@ -1804,7 +1804,7 @@ public class ShuyunApi {
 
         String post = "page=1&limit=1000&userId=" + userId
                 + "&flowId=" + flowId
-                + "&orderType&xmlx=&area=330300&cityArea=" + cityArea;
+                + "&orderType=&xmlx=&area=330300&cityArea=" + cityArea;
 
         String headers = buildCountyApiHeader(pcToken, cookieToken);
         try {
