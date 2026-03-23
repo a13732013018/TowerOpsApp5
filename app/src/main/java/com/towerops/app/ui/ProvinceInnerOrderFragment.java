@@ -79,6 +79,16 @@ public class ProvinceInnerOrderFragment extends Fragment {
         {"11950", "梅传威"}
     };
 
+    // ── 行政区划代码（与数运审核保持一致）────────────────────────────────
+    private static final String[] CITY_AREA_CODES = {
+        "330326", "330329", "330302", "330327", "330328",
+        "330381", "330382", "330303", "330305", "330324", "330383"
+    };
+    private static final String[] CITY_AREA_NAMES = {
+        "平阳县", "泰顺县", "鹿城区", "苍南县", "文成县",
+        "瑞安市", "乐清市", "龙湾区", "洞头区", "永嘉县", "龙港市"
+    };
+
     // ── 工单类型 ────────────────────────────────────────────────────
     private static final String[] ORDER_TYPE_NAMES  = {"全部", "应急", "投诉", "综合", "其他"};
     private static final String[] ORDER_TYPE_CODES  = {
@@ -95,6 +105,7 @@ public class ProvinceInnerOrderFragment extends Fragment {
     private Spinner spinnerGroup;
     private Spinner spinnerPerson;
     private Spinner spinnerOrderType;
+    private Spinner spinnerCounty;      // 区县选择器
     private Button btnQuery;
     private TextView tvStatus;
     private TextView tvLog;
@@ -104,6 +115,7 @@ public class ProvinceInnerOrderFragment extends Fragment {
     private int selectedGroupIndex      = 0;   // 0=第一小组, 1=第二小组
     private int selectedPersonIndex     = 0;   // 0=全部, 1..n=具体人
     private int selectedOrderTypeIndex  = 0;   // 工单类型下标
+    private int selectedCountyIndex     = 0;   // 区县下标
     private volatile boolean isQuerying = false;
 
     // ── 主线程Handler ────────────────────────────────────────────────
@@ -135,6 +147,7 @@ public class ProvinceInnerOrderFragment extends Fragment {
         spinnerGroup   = view.findViewById(R.id.spinnerPIGroup);
         spinnerPerson  = view.findViewById(R.id.spinnerPIPerson);
         spinnerOrderType = view.findViewById(R.id.spinnerPIOrderType);
+        spinnerCounty  = view.findViewById(R.id.spinnerPICounty);
         btnQuery       = view.findViewById(R.id.btnPIQuery);
         tvStatus       = view.findViewById(R.id.tvPIStatus);
         tvLog          = view.findViewById(R.id.tvPILog);
@@ -151,6 +164,12 @@ public class ProvinceInnerOrderFragment extends Fragment {
                 android.R.layout.simple_spinner_item, new String[]{"第一小组", "第二小组"});
         groupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerGroup.setAdapter(groupAdapter);
+
+        // 区县（行政区划代码）
+        ArrayAdapter<String> countyAdapter = new ArrayAdapter<>(requireContext(),
+                android.R.layout.simple_spinner_item, CITY_AREA_NAMES);
+        countyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCounty.setAdapter(countyAdapter);
 
         // 处理人（随小组动态生成）
         refreshPersonSpinner();
@@ -195,6 +214,14 @@ public class ProvinceInnerOrderFragment extends Fragment {
             @Override public void onNothingSelected(AdapterView<?> parent) {}
         });
 
+        spinnerCounty.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                selectedCountyIndex = position;
+            }
+            @Override public void onNothingSelected(AdapterView<?> parent) {}
+        });
+
         spinnerOrderType.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -229,21 +256,8 @@ public class ProvinceInnerOrderFragment extends Fragment {
         String[][] members  = selectedGroupIndex == 0 ? GROUP1_MEMBERS : GROUP2_MEMBERS;
         String  orderType   = ORDER_TYPE_CODES[selectedOrderTypeIndex];
 
-        // 区号：从Session读取，默认330326
-        String cityArea = s.countyManagerCode;
-        if (cityArea == null || cityArea.isEmpty()) {
-            // countyManagerCode 是区县经理代号（36745/31950），这里需要cityArea格式
-            // ShuyunAuditFragment里 CITY_AREA_CODES 对应 spinnerCounty 选择，
-            // 这里同样使用 ShuyunAuditFragment 的城市代码逻辑，默认取第一个
-            cityArea = "330326";
-        }
-        // 注意：countyManagerCode存的是行政区划代码（如330326），直接可用
-        // 如果存的是经理代号（36745/31950），需要转换；
-        // 根据ShuyunAuditFragment逻辑，CITY_AREA_CODES[selectedCountyIndex]才是cityArea
-        // 这里复用Session中 shuyunCityArea（若存在），否则取330326
-        if (s.shuyunCityArea != null && !s.shuyunCityArea.isEmpty()) {
-            cityArea = s.shuyunCityArea;
-        }
+        // 区号：使用用户选择的行政区划代码
+        String cityArea = CITY_AREA_CODES[selectedCountyIndex];
 
         final String finalPcToken     = pcToken;
         final String finalCookieToken = cookieToken;
