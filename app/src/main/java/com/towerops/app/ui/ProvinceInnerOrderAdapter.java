@@ -80,6 +80,10 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
         return null;
     }
 
+    public List<ShuyunApi.ProvinceInnerTaskInfo> getData() {
+        return new ArrayList<>(items);
+    }
+
     @Override
     public int getItemCount() {
         return items.size();
@@ -124,6 +128,7 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
         private final TextView tvOrderCount;
         private final TextView tvOrderNum;
         private final TextView tvOrderType;
+        private final TextView tvJobName;
         private final TextView tvFlowName;
         private final TextView tvReqTime;
         private final View itemView;
@@ -139,6 +144,7 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
             tvOrderCount  = itemView.findViewById(R.id.tvPIOrderCount);
             tvOrderNum    = itemView.findViewById(R.id.tvPIOrderNum);
             tvOrderType   = itemView.findViewById(R.id.tvPIOrderType);
+            tvJobName     = itemView.findViewById(R.id.tvPIJobName);
             tvFlowName    = itemView.findViewById(R.id.tvPIFlowName);
             tvReqTime     = itemView.findViewById(R.id.tvPIReqTime);
         }
@@ -167,11 +173,15 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
             // 站点名称
             tvStationName.setText(item.station_name != null ? item.station_name : "");
 
-            // 工单数量
+            // 工单数量（只有大于1张才显示）
             String stationName = item.station_name != null ? item.station_name : "";
             int count = countMap.getOrDefault(stationName, 1);
-            tvOrderCount.setText("(" + count + "张)");
-            tvOrderCount.setVisibility(count > 1 ? View.VISIBLE : View.GONE);
+            if (count > 1) {
+                tvOrderCount.setText("(" + count + "张)");
+                tvOrderCount.setVisibility(View.VISIBLE);
+            } else {
+                tvOrderCount.setVisibility(View.GONE);
+            }
 
             // 工单号
             tvOrderNum.setText("工单: " + (item.orderNum != null ? item.orderNum : ""));
@@ -179,16 +189,21 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
             // 工单类型标签
             tvOrderType.setText(resolveOrderTypeName(item.order_type));
 
-            // 流程名 + 环节
-            StringBuilder flow = new StringBuilder();
-            if (item.flowName != null && !item.flowName.isEmpty()) {
-                flow.append(item.flowName);
-            }
+            // 任务类型
             if (item.jobName != null && !item.jobName.isEmpty()) {
-                if (flow.length() > 0) flow.append(" → ");
-                flow.append(item.jobName);
+                tvJobName.setText("任务：" + item.jobName);
+                tvJobName.setVisibility(View.VISIBLE);
+            } else {
+                tvJobName.setVisibility(View.GONE);
             }
-            tvFlowName.setText(flow.length() > 0 ? flow.toString() : "");
+
+            // 流程名
+            if (item.flowName != null && !item.flowName.isEmpty()) {
+                tvFlowName.setText("流程：" + item.flowName);
+                tvFlowName.setVisibility(View.VISIBLE);
+            } else {
+                tvFlowName.setVisibility(View.GONE);
+            }
 
             // 要求完成时间
             String reqTime = item.req_comp_time != null ? item.req_comp_time : "";

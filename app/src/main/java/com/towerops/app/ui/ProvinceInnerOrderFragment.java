@@ -134,6 +134,7 @@ public class ProvinceInnerOrderFragment extends Fragment {
     private Spinner spinnerOrderType;
     private Spinner spinnerCounty;      // 区县选择器
     private Button btnQuery;
+    private Button btnToSignQuery;      // 待签查询按钮
     private TextView tvStatus;
     
     // 搜索和排序
@@ -201,6 +202,9 @@ public class ProvinceInnerOrderFragment extends Fragment {
         btnSortStation = view.findViewById(R.id.btnSortStation);
         btnSortTime = view.findViewById(R.id.btnSortTime);
         btnSortType = view.findViewById(R.id.btnSortType);
+        
+        // 待签查询按钮
+        btnToSignQuery = view.findViewById(R.id.btnToSignQuery);
 
         adapter = new ProvinceInnerOrderAdapter();
         rvOrders.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -213,14 +217,27 @@ public class ProvinceInnerOrderFragment extends Fragment {
     }
     
     /**
-     * 显示操作选择对话框（计划上站 / 综合上站回单）
+     * 显示操作选择对话框（计划上站 / 综合上站回单 / 签到）
      */
     private void showActionDialog(ShuyunApi.ProvinceInnerTaskInfo item) {
-        String[] options = {"计划上站", "综合上站回单"};
+        // 判断是否为待签工单（有jobId但没有flowInstId或为空）
+        boolean isToSign = item.jobId != null && !item.jobId.isEmpty()
+                && (item.flowInstId == null || item.flowInstId.isEmpty());
+
+        String[] options;
+        if (isToSign) {
+            options = new String[]{"签到接单"};
+        } else {
+            options = new String[]{"计划上站", "综合上站回单"};
+        }
+
         new AlertDialog.Builder(requireContext())
             .setTitle("选择操作 - " + item.station_name)
             .setItems(options, (dialog, which) -> {
-                if (which == 0) {
+                if (isToSign) {
+                    // 待签工单 - 签到
+                    showSignConfirmDialog(item);
+                } else if (which == 0) {
                     // 计划上站
                     showPlanSiteDialog(item);
                 } else {
@@ -230,6 +247,69 @@ public class ProvinceInnerOrderFragment extends Fragment {
             })
             .setNegativeButton("取消", null)
             .show();
+    }
+
+    /**
+     * 显示签到确认对话框
+     */
+    private void showSignConfirmDialog(ShuyunApi.ProvinceInnerTaskInfo item) {
+        new AlertDialog.Builder(requireContext())
+            .setTitle("确认签到")
+            .setMessage("站点: " + item.station_name + "\n"
+                    + "工单: " + item.orderNum + "\n"
+                    + "任务: " + item.jobName + "\n\n"
+                    + "确认执行签到操作？")
+            .setPositiveButton("确认签到", (dialog, which) -> {
+                executeSign(item);
+            })
+            .setNegativeButton("取消", null)
+            .show();
+    }
+
+    /**
+     * 执行签到
+     */
+    private void executeSign(ShuyunApi.ProvinceInnerTaskInfo item) {
+        Session s = Session.get();
+        String appToken = s.shuyunAppToken;
+        String userId = s.shuyunUserId;
+
+        if (appToken == null || appToken.isEmpty()) {
+            Toast.makeText(requireContext(), "请先登录数运APP", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        tvStatus.setText("正在签到: " + item.station_name + "...");
+
+        new Thread(() -> {
+            try {
+                // 模拟人类点击延迟（2-4秒随机）
+                Random random = new Random();
+                Thread.sleep(random.nextInt(2000) + 2000);
+
+                String result = ShuyunApi.signTask(appToken, userId,
+                        item.jobId, item.workInstId, item.orderNum, item.flowId);
+
+                ShuyunApi.ReceiptResult receiptResult = ShuyunApi.parseSignResult(result);
+
+                mainHandler.post(() -> {
+                    if (receiptResult.success) {
+                        Toast.makeText(requireContext(), "签到成功: " + item.station_name, Toast.LENGTH_SHORT).show();
+                        tvStatus.setText("签到成功: " + item.station_name);
+                        // 从列表中移除
+                        removeItemFromList(item);
+                    } else {
+                        Toast.makeText(requireContext(), "签到失败: " + receiptResult.message, Toast.LENGTH_LONG).show();
+                        tvStatus.setText("签到失败: " + receiptResult.message);
+                    }
+                });
+            } catch (Exception e) {
+                mainHandler.post(() -> {
+                    Toast.makeText(requireContext(), "签到异常: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    tvStatus.setText("签到异常");
+                });
+            }
+        }).start();
     }
     
     /**
@@ -547,27 +627,45 @@ public class ProvinceInnerOrderFragment extends Fragment {
 
         btnQuery.setOnClickListener(v -> startQuery());
         
+        // 待签查询按钮
+        btnToSignQuery.setOnClickListener(v -> startToSignQuery());
+        
         // 搜索按钮
         btnSearch.setOnClickListener(v -> searchAndLocate());
         
-        // 排序按钮
+        // 排序按钮 - 支持正反序切换（点击循环：无->正序->倒序->无）
         btnSortStation.setOnClickListener(v -> {
-            resetSortStates();
             sortStationState = (sortStationState + 1) % 3;
+            if (sortStationState != SORT_NONE) {
+                sortTimeState = SORT_NONE;
+                sortTypeState = SORT_NONE;
+            }
             updateSortButton(btnSortStation, sortStationState, "站名");
+            updateSortButton(btnSortTime, sortTimeState, "完成时间");
+            updateSortButton(btnSortType, sortTypeState, "工单类型");
             applySort();
         });
         
         btnSortTime.setOnClickListener(v -> {
-            resetSortStates();
             sortTimeState = (sortTimeState + 1) % 3;
+            if (sortTimeState != SORT_NONE) {
+                sortStationState = SORT_NONE;
+                sortTypeState = SORT_NONE;
+            }
+            updateSortButton(btnSortStation, sortStationState, "站名");
             updateSortButton(btnSortTime, sortTimeState, "完成时间");
+            updateSortButton(btnSortType, sortTypeState, "工单类型");
             applySort();
         });
         
         btnSortType.setOnClickListener(v -> {
-            resetSortStates();
             sortTypeState = (sortTypeState + 1) % 3;
+            if (sortTypeState != SORT_NONE) {
+                sortStationState = SORT_NONE;
+                sortTimeState = SORT_NONE;
+            }
+            updateSortButton(btnSortStation, sortStationState, "站名");
+            updateSortButton(btnSortTime, sortTimeState, "完成时间");
             updateSortButton(btnSortType, sortTypeState, "工单类型");
             applySort();
         });
@@ -645,36 +743,43 @@ public class ProvinceInnerOrderFragment extends Fragment {
         adapter.setData(sortedList);
     }
     
-    /** 搜索并定位到指定站点 */
+    /** 搜索并定位到指定站点（跳转到该站点的第一个工单） */
     private void searchAndLocate() {
         String keyword = etSearchStation.getText().toString().trim();
         if (keyword.isEmpty()) {
             Toast.makeText(requireContext(), "请输入站名", Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        if (originalData.isEmpty()) {
+
+        // 获取当前显示的数据
+        List<ShuyunApi.ProvinceInnerTaskInfo> currentData = adapter.getData();
+        if (currentData == null || currentData.isEmpty()) {
             Toast.makeText(requireContext(), "请先查询数据", Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        // 查找匹配的站点
+
+        // 查找匹配的站点（在当前显示的数据中）
         int targetPosition = -1;
-        for (int i = 0; i < originalData.size(); i++) {
-            ShuyunApi.ProvinceInnerTaskInfo item = originalData.get(i);
-            if (item.station_name != null && 
-                item.station_name.toLowerCase().contains(keyword.toLowerCase())) {
+        String foundStationName = null;
+        for (int i = 0; i < currentData.size(); i++) {
+            ShuyunApi.ProvinceInnerTaskInfo item = currentData.get(i);
+            if (item.station_name != null &&
+                    item.station_name.toLowerCase().contains(keyword.toLowerCase())) {
                 targetPosition = i;
+                foundStationName = item.station_name;
                 break;
             }
         }
-        
+
         if (targetPosition >= 0) {
-            // 滚动到指定位置
-            rvOrders.scrollToPosition(targetPosition);
-            // 高亮显示（通过adapter实现）
+            // 使用LayoutManager平滑滚动到指定位置
+            LinearLayoutManager layoutManager = (LinearLayoutManager) rvOrders.getLayoutManager();
+            if (layoutManager != null) {
+                layoutManager.scrollToPositionWithOffset(targetPosition, 0);
+            }
+            // 高亮显示
             adapter.setHighlightPosition(targetPosition);
-            tvStatus.setText("已定位到: " + originalData.get(targetPosition).station_name);
+            tvStatus.setText("已跳转到: " + foundStationName);
         } else {
             Toast.makeText(requireContext(), "未找到匹配的站点", Toast.LENGTH_SHORT).show();
         }
@@ -817,6 +922,75 @@ public class ProvinceInnerOrderFragment extends Fragment {
         }
 
         executor.shutdown();
+    }
+
+    // ── 待签工单查询 ───────────────────────────────────────────────────
+
+    private void startToSignQuery() {
+        if (isQuerying) {
+            Toast.makeText(getContext(), "查询中，请稍候...", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        // 获取数运APP登录Token
+        Session s = Session.get();
+        String appToken = s.shuyunAppToken;
+
+        if (appToken == null || appToken.isEmpty()) {
+            Toast.makeText(getContext(), "请先在监控页面登录数运APP", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        isQuerying = true;
+        btnToSignQuery.setEnabled(false);
+        btnToSignQuery.setText("查询中...");
+        adapter.setData(new ArrayList<>());
+        tvStatus.setText("查询待签工单中...");
+
+        new Thread(() -> {
+            try {
+                String json = ShuyunApi.getToSignTaskList(appToken, s.shuyunUserId);
+                List<ShuyunApi.ProvinceInnerTaskInfo> taskList =
+                        ShuyunApi.parseToSignTaskList(json);
+
+                // 为每条工单标注分组
+                for (ShuyunApi.ProvinceInnerTaskInfo task : taskList) {
+                    task.groupName = matchGroup(task.station_name);
+                    task.index = String.valueOf(taskList.indexOf(task) + 1);
+                }
+
+                // 统计每个站点的工单数量
+                stationOrderCount.clear();
+                for (ShuyunApi.ProvinceInnerTaskInfo item : taskList) {
+                    String stationName = item.station_name != null ? item.station_name : "";
+                    if (!stationName.isEmpty()) {
+                        stationOrderCount.put(stationName,
+                                stationOrderCount.getOrDefault(stationName, 0) + 1);
+                    }
+                }
+
+                // 保存原始数据
+                originalData.clear();
+                originalData.addAll(taskList);
+
+                mainHandler.post(() -> {
+                    adapter.setDataWithCount(taskList, stationOrderCount);
+                    tvStatus.setText("待签工单查询完成，共 " + taskList.size() + " 条，"
+                            + stationOrderCount.size() + " 个站点");
+                    btnToSignQuery.setEnabled(true);
+                    btnToSignQuery.setText("待签工单");
+                    isQuerying = false;
+                });
+
+            } catch (Exception e) {
+                mainHandler.post(() -> {
+                    tvStatus.setText("待签工单查询失败: " + e.getMessage());
+                    btnToSignQuery.setEnabled(true);
+                    btnToSignQuery.setText("待签工单");
+                    isQuerying = false;
+                });
+            }
+        }).start();
     }
 
     /** 根据 station_name 匹配分组名称 */

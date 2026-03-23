@@ -2077,4 +2077,200 @@ public class ShuyunApi {
         public boolean success;
         public String message;
     }
+
+    // ============================================================
+    // 待签工单查询 API
+    // ============================================================
+
+    /**
+     * 查询待签工单列表
+     * 对应易语言 子程序_数运APP签到
+     *
+     * @param appToken 数运APP登录token
+     * @param userId 用户ID
+     * @return API响应JSON
+     */
+    public static String getToSignTaskList(String appToken, String userId) {
+        String url = APP_BASE + "/zjtt-app-server/mobiledata";
+
+        String post = "data={"
+            + "\"head\":{\"Authorization\":\"" + appToken + "\"},"
+            + "\"requestType\":\"post\","
+            + "\"data\":{"
+            + "\"siteCode\":\"\","
+            + "\"limit\":100,"
+            + "\"siteName\":\"\","
+            + "\"orderNum\":\"\","
+            + "\"page\":1,"
+            + "\"flowInstName\":\"\","
+            + "\"userId\":\"" + userId + "\""
+            + "},"
+            + "\"interfaceName\":\"/api/flowable/mtCon/listToSign\","
+            + "\"apiType\":\"REST\""
+            + "}&action=CoreInterfaceBean.commonInterfaceHandler";
+
+        try {
+            String headers = buildAppApiHeader(appToken);
+            String result = HttpUtil.post(url, post, headers, null);
+            return result != null ? result : "";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    /**
+     * 解析待签工单列表
+     *
+     * @param json API返回的JSON
+     * @return 工单列表
+     */
+    public static List<ProvinceInnerTaskInfo> parseToSignTaskList(String json) {
+        List<ProvinceInnerTaskInfo> list = new ArrayList<>();
+        if (json == null || json.isEmpty()) return list;
+
+        try {
+            JSONObject root = new JSONObject(json);
+            JSONObject data = root.optJSONObject("data");
+            if (data == null) return list;
+
+            JSONObject dataObj = data.optJSONObject("data");
+            if (dataObj == null) return list;
+
+            JSONArray rows = dataObj.optJSONArray("rows");
+            if (rows == null) return list;
+
+            for (int i = 0; i < rows.length(); i++) {
+                JSONObject item = rows.optJSONObject(i);
+                if (item == null) continue;
+
+                ProvinceInnerTaskInfo info = new ProvinceInnerTaskInfo();
+                info.station_code  = item.optString("station_code", "");
+                info.station_name  = item.optString("station_name", "");
+                info.orderNum      = item.optString("orderNum", "");
+                info.flowName      = item.optString("flowName", "");
+                info.data_name     = item.optString("data_name", "");
+                info.createTime    = item.optString("createTime", "");
+                info.req_comp_time = item.optString("req_comp_time", "");
+                info.req_deal_limit= item.optString("req_deal_limit", "");
+                info.jobName       = item.optString("jobName", "");
+                info.order_desc    = item.optString("order_desc", "");
+                info.flowInstId    = item.optString("flowInstId", "");
+                info.jobId         = item.optString("jobId", "");
+                info.workInstId    = item.optString("workInstId", "");
+                info.flowId        = item.optString("flowId", "");
+                info.jobInstId     = item.optString("jobInstId", "");
+                info.order_type    = item.optString("order_type", "");
+                info.workType      = item.optString("workType", "");
+                info.handler       = item.optString("handler", "");
+                info.groupName     = "";
+                info.index         = String.valueOf(i + 1);
+                list.add(info);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    /**
+     * 构建数运APP API请求头
+     */
+    private static String buildAppApiHeader(String appToken) {
+        return "User-Agent: Dalvik/2.1.0 (Linux; U; Android 14; M2011K2C Build/UKQ1.240624.001)\r\n"
+            + "Authorization: " + appToken;
+    }
+
+    /**
+     * 待签工单签到
+     * 对应易语言 数运APP签到
+     *
+     * @param appToken APP登录token
+     * @param userId 用户ID
+     * @param jobId 任务ID
+     * @param workInstId 工作实例ID
+     * @param orderNum 工单号
+     * @param flowId 流程ID
+     * @return API响应JSON
+     */
+    public static String signTask(String appToken, String userId,
+            String jobId, String workInstId, String orderNum, String flowId) {
+        String url = APP_BASE + "/zjtt-app-server/mobiledata";
+
+        String post = "data={"
+            + "\"head\":{\"Authorization\":\"" + appToken + "\"},"
+            + "\"requestType\":\"post\","
+            + "\"data\":{"
+            + "\"jobId\":\"" + jobId + "\","
+            + "\"workInstId\":\"" + workInstId + "\","
+            + "\"orderNum\":\"" + orderNum + "\","
+            + "\"flowId\":\"" + flowId + "\","
+            + "\"userId\":\"" + userId + "\""
+            + "},"
+            + "\"interfaceName\":\"/api/flowable/mtCon/updateWorkStatus\","
+            + "\"apiType\":\"REST\""
+            + "}&action=CoreInterfaceBean.commonInterfaceHandler";
+
+        try {
+            String headers = buildAppApiHeader(appToken);
+            String result = HttpUtil.post(url, post, headers, null);
+            return result != null ? result : "";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    /**
+     * 解析签到结果
+     *
+     * @param json API返回的JSON
+     * @return 解析结果
+     */
+    public static ReceiptResult parseSignResult(String json) {
+        ReceiptResult result = new ReceiptResult();
+        result.success = false;
+        result.message = "解析失败";
+
+        if (json == null || json.isEmpty()) {
+            result.message = "网络超时或被拦截";
+            return result;
+        }
+
+        try {
+            JSONObject root = new JSONObject(json);
+            String returnCode = root.optString("returnCode", "");
+            String returnMsg = root.optString("returnMsg", "");
+            JSONObject data = root.optJSONObject("data");
+
+            // 判断成功：外层返回 1，且内层明确提示"成功"或 flag 为 true
+            if ("1".equals(returnCode)) {
+                if (data != null) {
+                    String dataMsg = data.optString("msg", "");
+                    boolean flag = data.optBoolean("flag", false);
+
+                    if (dataMsg.contains("成功") || flag) {
+                        result.success = true;
+                        result.message = "签到成功";
+                    } else if (!dataMsg.isEmpty()) {
+                        result.success = false;
+                        result.message = "失败:" + dataMsg;
+                    } else {
+                        result.success = false;
+                        result.message = "失败:" + (returnMsg.isEmpty() ? "未知业务异常" : returnMsg);
+                    }
+                } else {
+                    result.success = true;
+                    result.message = "签到成功";
+                }
+            } else {
+                result.success = false;
+                result.message = "失败:" + (returnMsg.isEmpty() ? "未知业务异常" : returnMsg);
+            }
+        } catch (Exception e) {
+            result.message = "失败:服务器返回数据异常";
+        }
+
+        return result;
+    }
 }

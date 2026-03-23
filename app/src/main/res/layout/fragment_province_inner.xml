@@ -28,7 +28,7 @@
                 android:layout_width="0dp"
                 android:layout_height="36dp"
                 android:layout_weight="1"
-                android:hint="输入站名搜索"
+                android:hint="输入站名查找"
                 android:textSize="12sp"
                 android:paddingStart="10dp"
                 android:paddingEnd="10dp"
@@ -40,7 +40,7 @@
                 android:layout_width="60dp"
                 android:layout_height="32dp"
                 android:layout_marginStart="8dp"
-                android:text="定位"
+                android:text="查找"
                 android:textSize="11sp"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#10B981"
@@ -133,13 +133,48 @@
                 android:padding="6dp" />
         </LinearLayout>
 
-        <!-- 第四行：排序按钮 -->
+        <!-- 第四行：查询按钮 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:layout_marginBottom="8dp">
+
+            <Button
+                android:id="@+id/btnPIQuery"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:text="我的待办"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#2563EB"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:stateListAnimator="@null" />
+
+            <Button
+                android:id="@+id/btnToSignQuery"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="8dp"
+                android:text="待签工单"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#8B5CF6"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+
+        <!-- 第五行：排序按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -151,11 +186,11 @@
             <Button
                 android:id="@+id/btnSortStation"
                 android:layout_width="0dp"
-                android:layout_height="28dp"
+                android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
                 android:text="站名"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textColor="#333333"
                 android:backgroundTint="#E5E7EB"
                 android:minWidth="0dp"
@@ -165,11 +200,11 @@
             <Button
                 android:id="@+id/btnSortTime"
                 android:layout_width="0dp"
-                android:layout_height="28dp"
+                android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
                 android:text="完成时间"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textColor="#333333"
                 android:backgroundTint="#E5E7EB"
                 android:minWidth="0dp"
@@ -179,33 +214,13 @@
             <Button
                 android:id="@+id/btnSortType"
                 android:layout_width="0dp"
-                android:layout_height="28dp"
+                android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="6dp"
                 android:text="工单类型"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textColor="#333333"
                 android:backgroundTint="#E5E7EB"
-                android:minWidth="0dp"
-                android:minHeight="0dp"
-                android:stateListAnimator="@null" />
-        </LinearLayout>
-
-        <!-- 第五行：查询按钮 -->
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
-
-            <Button
-                android:id="@+id/btnPIQuery"
-                android:layout_width="match_parent"
-                android:layout_height="36dp"
-                android:text="我的待办"
-                android:textSize="12sp"
-                android:textColor="@android:color/white"
-                android:backgroundTint="#2563EB"
                 android:minWidth="0dp"
                 android:minHeight="0dp"
                 android:stateListAnimator="@null" />
