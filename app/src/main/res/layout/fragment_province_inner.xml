@@ -38,10 +38,10 @@
             <Button
                 android:id="@+id/btnSearch"
                 android:layout_width="56dp"
-                android:layout_height="28dp"
+                android:layout_height="34dp"
                 android:layout_marginStart="6dp"
                 android:text="查找"
-                android:textSize="10sp"
+                android:textSize="11sp"
                 android:textColor="@android:color/white"
                 android:backgroundTint="#10B981"
                 android:minWidth="0dp"
@@ -140,7 +140,7 @@
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="6dp">
+            android:layout_marginBottom="4dp">
 
             <Button
                 android:id="@+id/btnPIQuery"
@@ -170,24 +170,25 @@
                 android:stateListAnimator="@null" />
         </LinearLayout>
 
-        <!-- 第五行：排序按钮（5个按钮：站名、完成时间、工单类型、数量、接单人） -->
+        <!-- 排序按钮（5个按钮：站名、完成时间、工单类型、数量、接单人） -->
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="32dp"
             android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:gravity="center_vertical"
+            android:layout_marginTop="4dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="排序:"
-                android:textSize="11sp"
+                android:textSize="10sp"
                 android:textColor="#666666" />
 
             <Button
                 android:id="@+id/btnSortStation"
                 android:layout_width="0dp"
-                android:layout_height="28dp"
+                android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:text="站名"
@@ -201,7 +202,7 @@
             <Button
                 android:id="@+id/btnSortTime"
                 android:layout_width="0dp"
-                android:layout_height="28dp"
+                android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:text="完成时间"
@@ -215,7 +216,7 @@
             <Button
                 android:id="@+id/btnSortType"
                 android:layout_width="0dp"
-                android:layout_height="28dp"
+                android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:text="工单类型"
@@ -229,7 +230,7 @@
             <Button
                 android:id="@+id/btnSortCount"
                 android:layout_width="0dp"
-                android:layout_height="28dp"
+                android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:text="数量"
@@ -243,7 +244,7 @@
             <Button
                 android:id="@+id/btnSortHandler"
                 android:layout_width="0dp"
-                android:layout_height="28dp"
+                android:layout_height="32dp"
                 android:layout_weight="1"
                 android:layout_marginStart="4dp"
                 android:text="接单人"

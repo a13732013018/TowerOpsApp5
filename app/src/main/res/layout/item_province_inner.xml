@@ -103,7 +103,7 @@
                 android:layout_marginStart="6dp" />
         </LinearLayout>
 
-        <!-- 工单号 + 工单类型 -->
+        <!-- 工单描述 + 工单类型 -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -112,14 +112,14 @@
             android:layout_marginTop="4dp">
 
             <TextView
-                android:id="@+id/tvPIOrderNum"
+                android:id="@+id/tvPIOrderDesc"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="工单号: TZ202501010001"
+                android:text="工单描述内容"
                 android:textSize="11sp"
                 android:textColor="#6B7280"
-                android:maxLines="1"
+                android:maxLines="2"
                 android:ellipsize="end" />
 
             <TextView

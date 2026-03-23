@@ -126,7 +126,7 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
         private final TextView tvCreateTime;
         private final TextView tvStationName;
         private final TextView tvOrderCount;
-        private final TextView tvOrderNum;
+        private final TextView tvOrderDesc;
         private final TextView tvOrderType;
         private final TextView tvDataName;
         private final TextView tvFlowName;
@@ -142,7 +142,7 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
             tvCreateTime  = itemView.findViewById(R.id.tvPICreateTime);
             tvStationName = itemView.findViewById(R.id.tvPIStationName);
             tvOrderCount  = itemView.findViewById(R.id.tvPIOrderCount);
-            tvOrderNum    = itemView.findViewById(R.id.tvPIOrderNum);
+            tvOrderDesc   = itemView.findViewById(R.id.tvPIOrderDesc);
             tvOrderType   = itemView.findViewById(R.id.tvPIOrderType);
             tvDataName    = itemView.findViewById(R.id.tvPIDataName);
             tvFlowName    = itemView.findViewById(R.id.tvPIFlowName);
@@ -179,8 +179,13 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
             tvOrderCount.setText("(" + count + "张)");
             tvOrderCount.setVisibility(View.VISIBLE);
 
-            // 工单号
-            tvOrderNum.setText("工单: " + (item.orderNum != null ? item.orderNum : ""));
+            // 工单描述
+            if (item.order_desc != null && !item.order_desc.isEmpty()) {
+                tvOrderDesc.setText(item.order_desc);
+                tvOrderDesc.setVisibility(View.VISIBLE);
+            } else {
+                tvOrderDesc.setVisibility(View.GONE);
+            }
 
             // 工单类型标签
             tvOrderType.setText(resolveOrderTypeName(item.order_type));
