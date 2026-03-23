@@ -16,7 +16,7 @@ import com.towerops.app.R;
 
 /**
  * 数运工单Fragment - 主容器，对应"数运工单"Tab
- * 包含两个子Tab：数运监控、数运审核
+ * 包含三个子Tab：数运监控、数运审核、省内待办
  */
 public class ShuyunFragment extends Fragment {
 
@@ -26,7 +26,7 @@ public class ShuyunFragment extends Fragment {
     private ViewPager2 viewPagerShuyunSub;
     private ShuyunSubPagerAdapter pagerAdapter;
 
-    private static final String[] TAB_TITLES = {"数运监控", "数运审核"};
+    private static final String[] TAB_TITLES = {"数运监控", "数运审核", "省内待办"};
 
     @Nullable
     @Override

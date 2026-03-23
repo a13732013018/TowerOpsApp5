@@ -1,0 +1,152 @@
+package com.towerops.app.ui;
+
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.TextView;
+
+import androidx.annotation.NonNull;
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.towerops.app.R;
+import com.towerops.app.api.ShuyunApi;
+
+import java.util.ArrayList;
+import java.util.List;
+
+/**
+ * 省内待办工单列表适配器
+ */
+public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInnerOrderAdapter.ViewHolder> {
+
+    private List<ShuyunApi.ProvinceInnerTaskInfo> items = new ArrayList<>();
+
+    public void setData(List<ShuyunApi.ProvinceInnerTaskInfo> newItems) {
+        items.clear();
+        if (newItems != null) {
+            items.addAll(newItems);
+        }
+        notifyDataSetChanged();
+    }
+
+    public void clear() {
+        items.clear();
+        notifyDataSetChanged();
+    }
+
+    public ShuyunApi.ProvinceInnerTaskInfo getItem(int position) {
+        if (position >= 0 && position < items.size()) {
+            return items.get(position);
+        }
+        return null;
+    }
+
+    @Override
+    public int getItemCount() {
+        return items.size();
+    }
+
+    @NonNull
+    @Override
+    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.item_province_inner, parent, false);
+        return new ViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        ShuyunApi.ProvinceInnerTaskInfo item = items.get(position);
+        holder.bind(item);
+    }
+
+    static class ViewHolder extends RecyclerView.ViewHolder {
+        private final TextView tvIndex;
+        private final TextView tvHandler;
+        private final TextView tvGroup;
+        private final TextView tvCreateTime;
+        private final TextView tvStationName;
+        private final TextView tvOrderNum;
+        private final TextView tvOrderType;
+        private final TextView tvFlowName;
+        private final TextView tvReqTime;
+
+        public ViewHolder(@NonNull View itemView) {
+            super(itemView);
+            tvIndex       = itemView.findViewById(R.id.tvPIIndex);
+            tvHandler     = itemView.findViewById(R.id.tvPIHandler);
+            tvGroup       = itemView.findViewById(R.id.tvPIGroup);
+            tvCreateTime  = itemView.findViewById(R.id.tvPICreateTime);
+            tvStationName = itemView.findViewById(R.id.tvPIStationName);
+            tvOrderNum    = itemView.findViewById(R.id.tvPIOrderNum);
+            tvOrderType   = itemView.findViewById(R.id.tvPIOrderType);
+            tvFlowName    = itemView.findViewById(R.id.tvPIFlowName);
+            tvReqTime     = itemView.findViewById(R.id.tvPIReqTime);
+        }
+
+        public void bind(ShuyunApi.ProvinceInnerTaskInfo item) {
+            // 序号
+            String idx = item.index != null && !item.index.isEmpty() ? item.index : "-";
+            tvIndex.setText(idx);
+
+            // 处理人
+            tvHandler.setText(item.handler != null ? item.handler : "");
+
+            // 分组
+            if (item.groupName != null && !item.groupName.isEmpty()) {
+                tvGroup.setText("【" + item.groupName + "】");
+                tvGroup.setVisibility(View.VISIBLE);
+            } else {
+                tvGroup.setVisibility(View.GONE);
+            }
+
+            // 创建时间（只显示日期+时间，截断秒后部分）
+            String ct = item.createTime != null ? item.createTime : "";
+            if (ct.length() > 16) ct = ct.substring(0, 16);
+            tvCreateTime.setText(ct);
+
+            // 站点名称
+            tvStationName.setText(item.station_name != null ? item.station_name : "");
+
+            // 工单号
+            tvOrderNum.setText("工单: " + (item.orderNum != null ? item.orderNum : ""));
+
+            // 工单类型标签
+            tvOrderType.setText(resolveOrderTypeName(item.order_type));
+
+            // 流程名 + 环节
+            StringBuilder flow = new StringBuilder();
+            if (item.flowName != null && !item.flowName.isEmpty()) {
+                flow.append(item.flowName);
+            }
+            if (item.jobName != null && !item.jobName.isEmpty()) {
+                if (flow.length() > 0) flow.append(" → ");
+                flow.append(item.jobName);
+            }
+            tvFlowName.setText(flow.length() > 0 ? flow.toString() : "");
+
+            // 要求完成时间
+            String reqTime = item.req_comp_time != null ? item.req_comp_time : "";
+            if (reqTime.length() > 16) reqTime = reqTime.substring(0, 16);
+            if (!reqTime.isEmpty()) {
+                tvReqTime.setText("要求完成: " + reqTime);
+                tvReqTime.setVisibility(View.VISIBLE);
+            } else {
+                tvReqTime.setVisibility(View.GONE);
+            }
+        }
+
+        /** 将 order_type 代码转成可读名称 */
+        private String resolveOrderTypeName(String code) {
+            if (code == null) return "未知";
+            switch (code) {
+                case "1028": return "应急";
+                case "1063": return "投诉";
+                case "1124":
+                case "1220": return "综合";
+                case "1118": return "其他";
+                default:     return code.isEmpty() ? "综合" : code;
+            }
+        }
+    }
+}

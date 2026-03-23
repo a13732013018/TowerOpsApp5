@@ -706,9 +706,8 @@ public class ShuyunApi {
      * 【核心】Authorization 和 towerNumber-Token 使用相同的值（PC登录token）
      * @param pcToken PC登录获取的token（用于Authorization）
      * @param cookieToken Cookie中的token（与pcToken相同）
-     * @param contentLength POST请求体长度
      */
-    private static String buildCountyApiHeader(String pcToken, String cookieToken, int contentLength) {
+    private static String buildCountyApiHeader(String pcToken, String cookieToken) {
         // 【调试】打印token前20字符用于确认
         System.out.println("[ShuyunApi] buildCountyApiHeader pcToken: " + (pcToken != null && pcToken.length() > 20 ? pcToken.substring(0, 20) + "..." : pcToken));
         
@@ -726,7 +725,6 @@ public class ShuyunApi {
                 + "Authorization: " + pcToken + "\n"
                 + "Cache-Control: no-cache\n"
                 + "Connection: keep-alive\n"
-                + "Content-Length: " + contentLength + "\n"
                 + "Content-Type: application/x-www-form-urlencoded;charset=UTF-8\n"
                 + "Cookie: " + cookie + "\n"
                 + "Host: zjtowercom.cn:8998\n"
@@ -740,7 +738,7 @@ public class ShuyunApi {
      * 县级/市级/省级审核工单列表请求头（兼容旧版本，使用同一个token）
      */
     private static String buildCountyApiHeader(String pcToken) {
-        return buildCountyApiHeader(pcToken, pcToken, 0);
+        return buildCountyApiHeader(pcToken, pcToken);
     }
 
     /**
@@ -895,7 +893,7 @@ public class ShuyunApi {
                 + "&area=330300"
                 + "&cityArea=" + cityArea;
 
-        String headers = buildCountyApiHeader(pcToken, pcToken, post.getBytes().length);
+        String headers = buildCountyApiHeader(pcToken);
         try {
             String result = HttpUtil.post(url, post, headers, null);
             return result != null ? result : "";
@@ -1009,8 +1007,8 @@ public class ShuyunApi {
                 + "&flowId=1025,1054,1055,1056,1131,1027,1028,1033,1038,1040,1048,1072,1118,1122,1127,1137,1143,1063"
                 + "&orderType=&xmlx=&area=&cityArea=";
 
-        // 【核心】使用固定cookieToken的请求头，添加Content-Length
-        String headers = buildCountyApiHeader(pcToken, pcToken, post.getBytes().length);
+        // 【核心】使用固定cookieToken的请求头
+        String headers = buildCountyApiHeader(pcToken);
         try {
             String result = HttpUtil.post(url, post, headers, null);
             return result != null ? result : "";
@@ -1174,8 +1172,8 @@ public class ShuyunApi {
         String post = "page=1&limit=10&userId=" + PROVINCE_AUDIT_USER_ID
                 + "&flowId=&orderType=&xmlx=&area=330300&cityArea=" + cityArea;
 
-        // 【核心】与市级审核使用相同的请求头，添加Content-Length
-        String headers = buildCountyApiHeader(pcToken, cookieToken, post.getBytes().length);
+        // 【核心】与市级审核使用相同的请求头
+        String headers = buildCountyApiHeader(pcToken, cookieToken);
         try {
             String result = HttpUtil.post(url, post, headers, null);
             return result != null ? result : "";
@@ -1330,8 +1328,8 @@ public class ShuyunApi {
         String post = "page=1&limit=10&userId=" + CITY_AUDIT_USER_ID
                 + "&flowId=&orderType=&xmlx=&area=330300&cityArea=" + cityArea;
 
-        // 【核心】使用双token，添加Content-Length
-        String headers = buildCountyApiHeader(pcToken, cookieToken, post.getBytes().length);
+        // 【核心】使用双token
+        String headers = buildCountyApiHeader(pcToken, cookieToken);
         try {
             String result = HttpUtil.post(url, post, headers, null);
             return result != null ? result : "";
@@ -1367,8 +1365,8 @@ public class ShuyunApi {
         String post = "page=1&limit=10&userId=" + CITY_AUDIT_USER_ID
                 + "&flowId=&orderType=&area=330300&cityArea=" + cityArea;
 
-        // 【核心】使用双token，添加Content-Length
-        String headers = buildCountyApiHeader(pcToken, cookieToken, post.getBytes().length);
+        // 【核心】使用双token
+        String headers = buildCountyApiHeader(pcToken, cookieToken);
         try {
             String result = HttpUtil.post(url, post, headers, null);
             return result != null ? result : "";
@@ -1702,5 +1700,168 @@ public class ShuyunApi {
                 + "Pragma: no-cache\n"
                 + "Referer: http://zjtowercom.cn:8998/dashboard\n"
                 + "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36";
+    }
+
+    // =====================================================================
+    // 省内待办工单 API（对应易语言"待办简易工单"查询逻辑）
+    // =====================================================================
+
+    /**
+     * 省内待办工单数据模型
+     * 对应易语言超级列表框31的各列
+     */
+    public static class ProvinceInnerTaskInfo {
+        public String index         = "";  // 序号
+        public String groupName     = "";  // 分组（分组常量匹配结果）
+        public String station_code  = "";  // 站点编码
+        public String station_name  = "";  // 站点名称
+        public String orderNum      = "";  // 工单号
+        public String flowName      = "";  // 流程名称
+        public String data_name     = "";  // 数据名称
+        public String createTime    = "";  // 创建时间
+        public String req_comp_time = "";  // 要求完成时间
+        public String req_deal_limit= "";  // 处理限期
+        public String jobName       = "";  // 环节名称
+        public String handler       = "";  // 处理人姓名
+        public String order_desc    = "";  // 工单描述
+        public String flowInstId    = "";  // 流程实例ID
+        public String jobId         = "";  // 任务ID
+        public String workInstId    = "";  // 工作实例ID
+        public String flowId        = "";  // 流程ID
+        public String jobInstId     = "";  // 任务实例ID
+        public String order_type    = "";  // 工单类型
+        public String workType      = "";  // 工作类型
+    }
+
+    /**
+     * 分组1（第一小组）的人员配置
+     */
+    public static final String[][] GROUP1_MEMBERS = {
+        {"12001", "林甲雨"},
+        {"22961", "卢智伟"},
+        {"12005", "高树调"},
+        {"12004", "苏忠前"},
+        {"12003", "黄经兴"},
+        {"12007", "陶大取"}
+    };
+
+    /**
+     * 分组2（第二小组）的人员配置
+     */
+    public static final String[][] GROUP2_MEMBERS = {
+        {"11961", "刘娟娟"},
+        {"11956", "朱兴达"},
+        {"11954", "王成"},
+        {"11953", "夏念悦"},
+        {"11950", "梅传威"}
+    };
+
+    /**
+     * 工单类型选项（与易语言组合框8对应）
+     * index 0 = 全部(1124,1220,1028,1063)
+     * index 1 = 应急(1028)
+     * index 2 = 投诉(1063)
+     * index 3 = 综合(1124,1220)
+     * index 4 = 其他(1118)
+     */
+    public static final String[] ORDER_TYPE_CODES = {
+        "1124,1220,1028,1063",
+        "1028",
+        "1063",
+        "1124,1220",
+        "1118"
+    };
+
+    /**
+     * 站点分组常量（与易语言分组常量数组对应）
+     * 用于匹配 station_name 判断所属分组
+     */
+    public static final String[][] STATION_GROUP_RULES = {
+        {"卢智伟、杨桂",  ""},   // 分组1：需从Session或配置读取实际常量
+        {"高树调、倪传井", ""},   // 分组2
+        {"苏忠前、许方喜", ""},   // 分组3
+        {"黄经兴、蔡亮",  ""},   // 分组4
+        {"陈德岳",        ""}    // 室分1组
+    };
+
+    /**
+     * 查询单个处理人的省内待办工单（limit=1000）
+     * 对应易语言 子程序_工作线程_拉取单人工单 中的网络请求
+     *
+     * @param pcToken     PC登录token（Authorization）
+     * @param cookieToken Cookie中的towerNumber-Token
+     * @param userId      处理人userId（如 "12001"）
+     * @param flowId      工单类型代码（如 "1124,1220,1028,1063"）
+     * @param cityArea    区号（如 "330326"）
+     * @return 工单列表JSON
+     */
+    public static String getProvinceInnerTaskList(String pcToken, String cookieToken,
+            String userId, String flowId, String cityArea) {
+        String url = PC_BASE + "/api/flowable/flowable/task/listTodo"
+                + "?page=1&limit=1000&userId=" + userId
+                + "&flowId=" + flowId
+                + "&orderType=&xmlx=&area=330300&cityArea=" + cityArea;
+
+        String post = "page=1&limit=1000&userId=" + userId
+                + "&flowId=" + flowId
+                + "&orderType&xmlx=&area=330300&cityArea=" + cityArea;
+
+        String headers = buildCountyApiHeader(pcToken, cookieToken);
+        try {
+            String result = HttpUtil.post(url, post, headers, null);
+            return result != null ? result : "";
+        } catch (Exception e) {
+            e.printStackTrace();
+            return "";
+        }
+    }
+
+    /**
+     * 解析省内待办工单列表（含处理人信息）
+     * 对应易语言 子程序_工作线程_拉取单人工单 中的JSON解析逻辑
+     *
+     * @param jsonStr   API返回的JSON
+     * @param handler   处理人姓名（由调用方传入）
+     * @param groupName 分组名（由调用方匹配后传入，可为空）
+     * @return 工单列表
+     */
+    public static List<ProvinceInnerTaskInfo> parseProvinceInnerTaskList(
+            String jsonStr, String handler, String groupName) {
+        List<ProvinceInnerTaskInfo> list = new ArrayList<>();
+        if (jsonStr == null || jsonStr.isEmpty()) return list;
+        try {
+            JSONObject root = new JSONObject(jsonStr);
+            JSONObject data = root.optJSONObject("data");
+            if (data == null) return list;
+            JSONArray rows = data.optJSONArray("rows");
+            if (rows == null) return list;
+            for (int i = 0; i < rows.length(); i++) {
+                JSONObject item = rows.getJSONObject(i);
+                ProvinceInnerTaskInfo info = new ProvinceInnerTaskInfo();
+                info.station_code  = item.optString("station_code",  "");
+                info.station_name  = item.optString("station_name",  "");
+                info.orderNum      = item.optString("orderNum",       "");
+                info.flowName      = item.optString("flowName",       "");
+                info.data_name     = item.optString("data_name",      "");
+                info.createTime    = item.optString("createTime",     "");
+                info.req_comp_time = item.optString("req_comp_time",  "");
+                info.req_deal_limit= item.optString("req_deal_limit", "");
+                info.jobName       = item.optString("jobName",        "");
+                info.order_desc    = item.optString("order_desc",     "");
+                info.flowInstId    = item.optString("flowInstId",     "");
+                info.jobId         = item.optString("jobId",          "");
+                info.workInstId    = item.optString("workInstId",     "");
+                info.flowId        = item.optString("flowId",         "");
+                info.jobInstId     = item.optString("jobInstId",      "");
+                info.order_type    = item.optString("order_type",     "");
+                info.workType      = item.optString("workType",       "");
+                info.handler       = handler;
+                info.groupName     = groupName != null ? groupName : "";
+                list.add(info);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 }

@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:background="#F5F7FA">
 
-    <!-- 子Tab切换：监控 | 审核 -->
+    <!-- 子Tab切换：监控 | 审核 | 省内待办 -->
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tabLayoutShuyunSub"
         android:layout_width="match_parent"
@@ -15,7 +15,7 @@
         app:tabIndicatorColor="#2563EB"
         app:tabSelectedTextColor="#2563EB"
         app:tabTextColor="#666666"
-        app:tabMode="fixed"
+        app:tabMode="scrollable"
         app:tabGravity="fill"
         app:tabTextAppearance="@style/TabTextSub">
 
@@ -28,6 +28,11 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="数运审核" />
+
+        <com.google.android.material.tabs.TabItem
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="省内待办" />
 
     </com.google.android.material.tabs.TabLayout>
 

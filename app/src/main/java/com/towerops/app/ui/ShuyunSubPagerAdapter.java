@@ -9,11 +9,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * 数运工单子Tab适配器 - 用于"数运监控"和"数运审核"Tab切换
+ * 数运工单子Tab适配器 - 数运监控 | 数运审核 | 省内待办
  */
 public class ShuyunSubPagerAdapter extends FragmentStateAdapter {
 
-    private static final int TAB_COUNT = 2;
+    private static final int TAB_COUNT = 3;
     private final List<Fragment> fragments = new ArrayList<>();
 
     public ShuyunSubPagerAdapter(@NonNull FragmentActivity fragmentActivity) {
@@ -30,6 +30,9 @@ public class ShuyunSubPagerAdapter extends FragmentStateAdapter {
                 break;
             case 1:
                 fragment = new ShuyunAuditFragment();
+                break;
+            case 2:
+                fragment = new ProvinceInnerOrderFragment();
                 break;
             default:
                 fragment = new ShuyunMonitorFragment();
@@ -75,6 +78,17 @@ public class ShuyunSubPagerAdapter extends FragmentStateAdapter {
         Fragment fragment = getFragment(1);
         if (fragment instanceof ShuyunAuditFragment) {
             return (ShuyunAuditFragment) fragment;
+        }
+        return null;
+    }
+
+    /**
+     * 获取 ProvinceInnerOrderFragment
+     */
+    public ProvinceInnerOrderFragment getProvinceInnerFragment() {
+        Fragment fragment = getFragment(2);
+        if (fragment instanceof ProvinceInnerOrderFragment) {
+            return (ProvinceInnerOrderFragment) fragment;
         }
         return null;
     }

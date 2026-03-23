@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#F5F7FA">
+
+    <!-- 查询控制面板 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp"
+        android:background="@android:color/white"
+        android:layout_marginTop="6dp">
+
+        <!-- 第一行：小组选择 + 工单类型 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="小组:"
+                android:textSize="13sp"
+                android:textColor="#333333" />
+
+            <Spinner
+                android:id="@+id/spinnerPIGroup"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_spinner"
+                android:padding="6dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="类型:"
+                android:textSize="13sp"
+                android:textColor="#333333"
+                android:layout_marginStart="10dp" />
+
+            <Spinner
+                android:id="@+id/spinnerPIOrderType"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_spinner"
+                android:padding="6dp" />
+        </LinearLayout>
+
+        <!-- 第二行：处理人 + 查询按钮 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="人员:"
+                android:textSize="13sp"
+                android:textColor="#333333" />
+
+            <Spinner
+                android:id="@+id/spinnerPIPerson"
+                android:layout_width="0dp"
+                android:layout_height="36dp"
+                android:layout_weight="1"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_spinner"
+                android:padding="6dp" />
+
+            <Button
+                android:id="@+id/btnPIQuery"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:text="我的待办"
+                android:textSize="12sp"
+                android:textColor="@android:color/white"
+                android:backgroundTint="#2563EB"
+                android:layout_marginStart="8dp"
+                android:paddingLeft="14dp"
+                android:paddingRight="14dp"
+                android:minWidth="0dp"
+                android:minHeight="0dp"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- 状态栏 -->
+    <TextView
+        android:id="@+id/tvPIStatus"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="就绪，请选择小组后点击查询"
+        android:textSize="11sp"
+        android:textColor="#2563EB"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="5dp"
+        android:background="#EFF6FF" />
+
+    <!-- 工单列表（占主体空间） -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rvProvinceInnerOrders"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="2"
+        android:padding="8dp"
+        android:clipToPadding="false"
+        android:scrollbars="vertical" />
+
+    <!-- 日志区域 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:background="@android:color/white"
+        android:layout_marginTop="2dp">
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="查询日志"
+            android:textSize="11sp"
+            android:textColor="#666666"
+            android:paddingLeft="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:paddingRight="10dp"
+            android:background="#F3F4F6" />
+
+        <ScrollView
+            android:id="@+id/svPILog"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp">
+
+            <TextView
+                android:id="@+id/tvPILog"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="#333333"
+                android:fontFamily="monospace"
+                android:lineSpacingMultiplier="1.15" />
+        </ScrollView>
+    </LinearLayout>
+
+</LinearLayout>
