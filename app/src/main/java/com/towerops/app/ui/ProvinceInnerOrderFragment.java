@@ -143,6 +143,9 @@ public class ProvinceInnerOrderFragment extends Fragment {
     private Button btnSortStation;
     private Button btnSortTime;
     private Button btnSortType;
+    private Button btnSortCount;
+    private Button btnSortHandler;
+    private Button btnSortDispatchTime;
 
     // ── 状态 ────────────────────────────────────────────────────────
     private int selectedGroupIndex      = 0;   // 0=第一小组, 1=第二小组
@@ -158,6 +161,9 @@ public class ProvinceInnerOrderFragment extends Fragment {
     private int sortStationState = SORT_NONE;
     private int sortTimeState = SORT_NONE;
     private int sortTypeState = SORT_NONE;
+    private int sortCountState = SORT_NONE;
+    private int sortHandlerState = SORT_NONE;
+    private int sortDispatchTimeState = SORT_NONE;
     
     // ── 原始数据缓存 ─────────────────────────────────────────────────
     private List<ShuyunApi.ProvinceInnerTaskInfo> originalData = new ArrayList<>();
@@ -202,6 +208,9 @@ public class ProvinceInnerOrderFragment extends Fragment {
         btnSortStation = view.findViewById(R.id.btnSortStation);
         btnSortTime = view.findViewById(R.id.btnSortTime);
         btnSortType = view.findViewById(R.id.btnSortType);
+        btnSortCount = view.findViewById(R.id.btnSortCount);
+        btnSortHandler = view.findViewById(R.id.btnSortHandler);
+        btnSortDispatchTime = view.findViewById(R.id.btnSortDispatchTime);
         
         // 待签查询按钮
         btnToSignQuery = view.findViewById(R.id.btnToSignQuery);
@@ -556,7 +565,7 @@ public class ProvinceInnerOrderFragment extends Fragment {
     private void setupSpinners() {
         // 小组
         ArrayAdapter<String> groupAdapter = new ArrayAdapter<>(requireContext(),
-                android.R.layout.simple_spinner_item, new String[]{"第一小组", "第二小组"});
+                android.R.layout.simple_spinner_item, new String[]{"平阳小组", "泰顺小组"});
         groupAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinnerGroup.setAdapter(groupAdapter);
 
@@ -639,10 +648,11 @@ public class ProvinceInnerOrderFragment extends Fragment {
             if (sortStationState != SORT_NONE) {
                 sortTimeState = SORT_NONE;
                 sortTypeState = SORT_NONE;
+                sortCountState = SORT_NONE;
+                sortHandlerState = SORT_NONE;
+                sortDispatchTimeState = SORT_NONE;
             }
-            updateSortButton(btnSortStation, sortStationState, "站名");
-            updateSortButton(btnSortTime, sortTimeState, "完成时间");
-            updateSortButton(btnSortType, sortTypeState, "工单类型");
+            updateAllSortButtons();
             applySort();
         });
         
@@ -651,10 +661,11 @@ public class ProvinceInnerOrderFragment extends Fragment {
             if (sortTimeState != SORT_NONE) {
                 sortStationState = SORT_NONE;
                 sortTypeState = SORT_NONE;
+                sortCountState = SORT_NONE;
+                sortHandlerState = SORT_NONE;
+                sortDispatchTimeState = SORT_NONE;
             }
-            updateSortButton(btnSortStation, sortStationState, "站名");
-            updateSortButton(btnSortTime, sortTimeState, "完成时间");
-            updateSortButton(btnSortType, sortTypeState, "工单类型");
+            updateAllSortButtons();
             applySort();
         });
         
@@ -663,12 +674,65 @@ public class ProvinceInnerOrderFragment extends Fragment {
             if (sortTypeState != SORT_NONE) {
                 sortStationState = SORT_NONE;
                 sortTimeState = SORT_NONE;
+                sortCountState = SORT_NONE;
+                sortHandlerState = SORT_NONE;
+                sortDispatchTimeState = SORT_NONE;
             }
-            updateSortButton(btnSortStation, sortStationState, "站名");
-            updateSortButton(btnSortTime, sortTimeState, "完成时间");
-            updateSortButton(btnSortType, sortTypeState, "工单类型");
+            updateAllSortButtons();
             applySort();
         });
+        
+        // 工单数量排序
+        btnSortCount.setOnClickListener(v -> {
+            sortCountState = (sortCountState + 1) % 3;
+            if (sortCountState != SORT_NONE) {
+                sortStationState = SORT_NONE;
+                sortTimeState = SORT_NONE;
+                sortTypeState = SORT_NONE;
+                sortHandlerState = SORT_NONE;
+                sortDispatchTimeState = SORT_NONE;
+            }
+            updateAllSortButtons();
+            applySort();
+        });
+        
+        // 接单人排序
+        btnSortHandler.setOnClickListener(v -> {
+            sortHandlerState = (sortHandlerState + 1) % 3;
+            if (sortHandlerState != SORT_NONE) {
+                sortStationState = SORT_NONE;
+                sortTimeState = SORT_NONE;
+                sortTypeState = SORT_NONE;
+                sortCountState = SORT_NONE;
+                sortDispatchTimeState = SORT_NONE;
+            }
+            updateAllSortButtons();
+            applySort();
+        });
+        
+        // 派单时间排序
+        btnSortDispatchTime.setOnClickListener(v -> {
+            sortDispatchTimeState = (sortDispatchTimeState + 1) % 3;
+            if (sortDispatchTimeState != SORT_NONE) {
+                sortStationState = SORT_NONE;
+                sortTimeState = SORT_NONE;
+                sortTypeState = SORT_NONE;
+                sortCountState = SORT_NONE;
+                sortHandlerState = SORT_NONE;
+            }
+            updateAllSortButtons();
+            applySort();
+        });
+    }
+    
+    /** 更新所有排序按钮显示 */
+    private void updateAllSortButtons() {
+        updateSortButton(btnSortStation, sortStationState, "站名");
+        updateSortButton(btnSortTime, sortTimeState, "要求完成时间");
+        updateSortButton(btnSortType, sortTypeState, "工单类型");
+        updateSortButton(btnSortCount, sortCountState, "工单数量");
+        updateSortButton(btnSortHandler, sortHandlerState, "接单人");
+        updateSortButton(btnSortDispatchTime, sortDispatchTimeState, "派单时间");
     }
     
     /** 重置所有排序状态 */
@@ -676,9 +740,10 @@ public class ProvinceInnerOrderFragment extends Fragment {
         sortStationState = SORT_NONE;
         sortTimeState = SORT_NONE;
         sortTypeState = SORT_NONE;
-        updateSortButton(btnSortStation, SORT_NONE, "站名");
-        updateSortButton(btnSortTime, SORT_NONE, "完成时间");
-        updateSortButton(btnSortType, SORT_NONE, "工单类型");
+        sortCountState = SORT_NONE;
+        sortHandlerState = SORT_NONE;
+        sortDispatchTimeState = SORT_NONE;
+        updateAllSortButtons();
     }
     
     /** 更新排序按钮显示 */
@@ -734,6 +799,29 @@ public class ProvinceInnerOrderFragment extends Fragment {
                 int result = typeA.compareTo(typeB);
                 return sortTypeState == SORT_ASC ? result : -result;
             };
+        } else if (sortCountState != SORT_NONE) {
+            comparator = (a, b) -> {
+                String stationA = a.station_name != null ? a.station_name : "";
+                String stationB = b.station_name != null ? b.station_name : "";
+                int countA = stationOrderCount.getOrDefault(stationA, 1);
+                int countB = stationOrderCount.getOrDefault(stationB, 1);
+                int result = Integer.compare(countA, countB);
+                return sortCountState == SORT_ASC ? result : -result;
+            };
+        } else if (sortHandlerState != SORT_NONE) {
+            comparator = (a, b) -> {
+                String handlerA = a.handler != null ? a.handler : "";
+                String handlerB = b.handler != null ? b.handler : "";
+                int result = handlerA.compareTo(handlerB);
+                return sortHandlerState == SORT_ASC ? result : -result;
+            };
+        } else if (sortDispatchTimeState != SORT_NONE) {
+            comparator = (a, b) -> {
+                String timeA = a.createTime != null ? a.createTime : "";
+                String timeB = b.createTime != null ? b.createTime : "";
+                int result = timeA.compareTo(timeB);
+                return sortDispatchTimeState == SORT_ASC ? result : -result;
+            };
         }
         
         if (comparator != null) {
@@ -743,7 +831,7 @@ public class ProvinceInnerOrderFragment extends Fragment {
         adapter.setData(sortedList);
     }
     
-    /** 搜索并定位到指定站点（跳转到该站点的第一个工单） */
+    /** 搜索并定位到指定站点（将该站所有工单置顶显示） */
     private void searchAndLocate() {
         String keyword = etSearchStation.getText().toString().trim();
         if (keyword.isEmpty()) {
@@ -758,28 +846,43 @@ public class ProvinceInnerOrderFragment extends Fragment {
             return;
         }
 
-        // 查找匹配的站点（在当前显示的数据中）
-        int targetPosition = -1;
+        // 查找匹配的站点
         String foundStationName = null;
-        for (int i = 0; i < currentData.size(); i++) {
-            ShuyunApi.ProvinceInnerTaskInfo item = currentData.get(i);
+        List<ShuyunApi.ProvinceInnerTaskInfo> matchedOrders = new ArrayList<>();
+        List<ShuyunApi.ProvinceInnerTaskInfo> otherOrders = new ArrayList<>();
+        
+        for (ShuyunApi.ProvinceInnerTaskInfo item : currentData) {
             if (item.station_name != null &&
                     item.station_name.toLowerCase().contains(keyword.toLowerCase())) {
-                targetPosition = i;
-                foundStationName = item.station_name;
-                break;
+                if (foundStationName == null) {
+                    foundStationName = item.station_name;
+                }
+                matchedOrders.add(item);
+            } else {
+                otherOrders.add(item);
             }
         }
 
-        if (targetPosition >= 0) {
-            // 使用LayoutManager平滑滚动到指定位置
-            LinearLayoutManager layoutManager = (LinearLayoutManager) rvOrders.getLayoutManager();
-            if (layoutManager != null) {
-                layoutManager.scrollToPositionWithOffset(targetPosition, 0);
+        if (!matchedOrders.isEmpty()) {
+            // 将该站所有工单置顶，其他工单排后面
+            List<ShuyunApi.ProvinceInnerTaskInfo> reorderedList = new ArrayList<>();
+            reorderedList.addAll(matchedOrders);
+            reorderedList.addAll(otherOrders);
+            
+            // 重新编号
+            for (int i = 0; i < reorderedList.size(); i++) {
+                reorderedList.get(i).index = String.valueOf(i + 1);
             }
-            // 高亮显示
-            adapter.setHighlightPosition(targetPosition);
-            tvStatus.setText("已跳转到: " + foundStationName);
+            
+            // 更新适配器数据
+            adapter.setData(reorderedList);
+            
+            // 滚动到顶部
+            rvOrders.scrollToPosition(0);
+            
+            // 高亮显示第一个匹配的工单
+            adapter.setHighlightPosition(0);
+            tvStatus.setText("已显示 '" + foundStationName + "' 的 " + matchedOrders.size() + " 张工单");
         } else {
             Toast.makeText(requireContext(), "未找到匹配的站点", Toast.LENGTH_SHORT).show();
         }

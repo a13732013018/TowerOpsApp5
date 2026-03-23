@@ -173,15 +173,11 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
             // 站点名称
             tvStationName.setText(item.station_name != null ? item.station_name : "");
 
-            // 工单数量（只有大于1张才显示）
+            // 工单数量（始终显示，包括1张时）
             String stationName = item.station_name != null ? item.station_name : "";
             int count = countMap.getOrDefault(stationName, 1);
-            if (count > 1) {
-                tvOrderCount.setText("(" + count + "张)");
-                tvOrderCount.setVisibility(View.VISIBLE);
-            } else {
-                tvOrderCount.setVisibility(View.GONE);
-            }
+            tvOrderCount.setText("(" + count + "张)");
+            tvOrderCount.setVisibility(View.VISIBLE);
 
             // 工单号
             tvOrderNum.setText("工单: " + (item.orderNum != null ? item.orderNum : ""));
@@ -227,12 +223,12 @@ public class ProvinceInnerOrderAdapter extends RecyclerView.Adapter<ProvinceInne
         private String resolveOrderTypeName(String code) {
             if (code == null) return "未知";
             switch (code) {
-                case "1028": return "应急";
-                case "1063": return "投诉";
+                case "1028": return "一般省内任务派单流程";
+                case "1063": return "省内简易派单流程";
                 case "1124":
-                case "1220": return "综合";
-                case "1118": return "其他";
-                default:     return code.isEmpty() ? "综合" : code;
+                case "1220": return "智联业务综合派单流程";
+                case "1118": return "退服隐患整治工单";
+                default:     return code.isEmpty() ? "智联业务综合派单流程" : code;
             }
         }
     }
