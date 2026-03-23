@@ -659,7 +659,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
                 sortTypeState = SORT_NONE;
                 sortCountState = SORT_NONE;
                 sortHandlerState = SORT_NONE;
-                sortDispatchTimeState = SORT_NONE;
             }
             updateAllSortButtons();
             applySort();
@@ -672,7 +671,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
                 sortTypeState = SORT_NONE;
                 sortCountState = SORT_NONE;
                 sortHandlerState = SORT_NONE;
-                sortDispatchTimeState = SORT_NONE;
             }
             updateAllSortButtons();
             applySort();
@@ -685,7 +683,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
                 sortTimeState = SORT_NONE;
                 sortCountState = SORT_NONE;
                 sortHandlerState = SORT_NONE;
-                sortDispatchTimeState = SORT_NONE;
             }
             updateAllSortButtons();
             applySort();
@@ -699,7 +696,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
                 sortTimeState = SORT_NONE;
                 sortTypeState = SORT_NONE;
                 sortHandlerState = SORT_NONE;
-                sortDispatchTimeState = SORT_NONE;
             }
             updateAllSortButtons();
             applySort();
