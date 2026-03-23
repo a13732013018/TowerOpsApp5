@@ -27,7 +27,7 @@
                 android:id="@+id/etSearchStation"
                 android:layout_width="0dp"
                 android:layout_height="32dp"
-                android:layout_weight="1"
+                android:layout_weight="80"
                 android:hint="输入站名查找"
                 android:textSize="11sp"
                 android:paddingStart="8dp"
@@ -37,7 +37,7 @@
 
             <Button
                 android:id="@+id/btnSearch"
-                android:layout_width="56dp"
+                android:layout_width="70dp"
                 android:layout_height="34dp"
                 android:layout_marginStart="6dp"
                 android:text="查找"
