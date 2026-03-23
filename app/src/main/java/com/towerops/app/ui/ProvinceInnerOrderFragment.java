@@ -108,8 +108,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
     private Spinner spinnerCounty;      // 区县选择器
     private Button btnQuery;
     private TextView tvStatus;
-    private TextView tvLog;
-    private ScrollView svLog;
 
     // ── 状态 ────────────────────────────────────────────────────────
     private int selectedGroupIndex      = 0;   // 0=第一小组, 1=第二小组
@@ -150,8 +148,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
         spinnerCounty  = view.findViewById(R.id.spinnerPICounty);
         btnQuery       = view.findViewById(R.id.btnPIQuery);
         tvStatus       = view.findViewById(R.id.tvPIStatus);
-        tvLog          = view.findViewById(R.id.tvPILog);
-        svLog          = view.findViewById(R.id.svPILog);
 
         adapter = new ProvinceInnerOrderAdapter();
         rvOrders.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -289,7 +285,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
         btnQuery.setText("查询中...");
         adapter.setData(new ArrayList<>());
         tvStatus.setText("查询中 0/" + targets.size() + "...");
-        appendLog("开始查询，共 " + targets.size() + " 人，类型：" + ORDER_TYPE_NAMES[selectedOrderTypeIndex]);
 
         final AtomicInteger doneCount = new AtomicInteger(0);
         final int totalCount          = targets.size();
@@ -299,25 +294,14 @@ public class ProvinceInnerOrderFragment extends Fragment {
         // 5线程池（与易语言一致）
         ExecutorService executor = Executors.newFixedThreadPool(Math.min(5, totalCount));
 
-        // 【调试】输出查询参数
-        appendLog("Token: " + (finalPcToken != null ? finalPcToken.substring(0, Math.min(15, finalPcToken.length())) + "..." : "null"));
-        appendLog("CityArea: " + finalCityArea);
-        appendLog("OrderType: " + orderType);
-        
         for (String[] member : targets) {
             final String userId   = member[0];
             final String handler  = member[1];
 
             executor.submit(() -> {
                 try {
-                    appendLog("[" + handler + "] 开始查询...");
                     String json = ShuyunApi.getProvinceInnerTaskList(
                             finalPcToken, finalCookieToken, userId, orderType, finalCityArea);
-                    
-                    appendLog("[" + handler + "] 响应长度: " + json.length());
-                    if (json.length() < 100) {
-                        appendLog("[" + handler + "] 响应: " + json);
-                    }
 
                     List<ShuyunApi.ProvinceInnerTaskInfo> taskList =
                             ShuyunApi.parseProvinceInnerTaskList(json, handler, "");
@@ -339,13 +323,11 @@ public class ProvinceInnerOrderFragment extends Fragment {
                     mainHandler.post(() -> {
                         tvStatus.setText("查询中 " + done + "/" + totalCount
                                 + "... " + handler + " (" + taskList.size() + "条)");
-                        appendLog(handler + ": " + taskList.size() + " 条");
                     });
 
                 } catch (Exception e) {
                     int done = doneCount.incrementAndGet();
                     mainHandler.post(() -> {
-                        appendLog(handler + " 查询失败: " + e.getMessage());
                         tvStatus.setText("查询中 " + done + "/" + totalCount + "...");
                     });
                 }
@@ -359,7 +341,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
                     mainHandler.post(() -> {
                         adapter.setData(resultList);
                         tvStatus.setText("查询完成，共 " + resultList.size() + " 条工单");
-                        appendLog("查询完成，合计 " + resultList.size() + " 条");
                         btnQuery.setEnabled(true);
                         btnQuery.setText("我的待办");
                         isQuerying = false;
@@ -380,23 +361,6 @@ public class ProvinceInnerOrderFragment extends Fragment {
             }
         }
         return "";
-    }
-
-    // ── 日志 ─────────────────────────────────────────────────────────
-
-    private void appendLog(String msg) {
-        mainHandler.post(() -> {
-            if (tvLog == null || svLog == null) return;
-            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss", Locale.getDefault());
-            String timeStr = sdf.format(new Date());
-            String current = tvLog.getText().toString();
-            // 防止日志过长
-            if (current.length() > 3000) {
-                current = current.substring(current.length() - 2000);
-            }
-            tvLog.setText(current + "\n" + timeStr + " " + msg);
-            svLog.post(() -> svLog.fullScroll(View.FOCUS_DOWN));
-        });
     }
 
     @Override
