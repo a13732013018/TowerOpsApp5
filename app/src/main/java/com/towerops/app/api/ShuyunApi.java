@@ -1807,11 +1807,20 @@ public class ShuyunApi {
                 + "&orderType=&xmlx=&area=330300&cityArea=" + cityArea;
 
         String headers = buildCountyApiHeader(pcToken, cookieToken);
+        
+        // 【调试日志】
+        System.out.println("[ProvinceInner] URL: " + url);
+        System.out.println("[ProvinceInner] POST: " + post);
+        System.out.println("[ProvinceInner] Token: " + (pcToken != null ? pcToken.substring(0, Math.min(20, pcToken.length())) + "..." : "null"));
+        
         try {
             String result = HttpUtil.post(url, post, headers, null);
+            // 【调试日志】
+            System.out.println("[ProvinceInner] Response: " + (result != null ? result.substring(0, Math.min(200, result.length())) + "..." : "null"));
             return result != null ? result : "";
         } catch (Exception e) {
             e.printStackTrace();
+            System.out.println("[ProvinceInner] Error: " + e.getMessage());
             return "";
         }
     }

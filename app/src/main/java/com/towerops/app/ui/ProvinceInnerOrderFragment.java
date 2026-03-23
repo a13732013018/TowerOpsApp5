@@ -285,14 +285,25 @@ public class ProvinceInnerOrderFragment extends Fragment {
         // 5线程池（与易语言一致）
         ExecutorService executor = Executors.newFixedThreadPool(Math.min(5, totalCount));
 
+        // 【调试】输出查询参数
+        appendLog("Token: " + (finalPcToken != null ? finalPcToken.substring(0, Math.min(15, finalPcToken.length())) + "..." : "null"));
+        appendLog("CityArea: " + finalCityArea);
+        appendLog("OrderType: " + orderType);
+        
         for (String[] member : targets) {
             final String userId   = member[0];
             final String handler  = member[1];
 
             executor.submit(() -> {
                 try {
+                    appendLog("[" + handler + "] 开始查询...");
                     String json = ShuyunApi.getProvinceInnerTaskList(
                             finalPcToken, finalCookieToken, userId, orderType, finalCityArea);
+                    
+                    appendLog("[" + handler + "] 响应长度: " + json.length());
+                    if (json.length() < 100) {
+                        appendLog("[" + handler + "] 响应: " + json);
+                    }
 
                     List<ShuyunApi.ProvinceInnerTaskInfo> taskList =
                             ShuyunApi.parseProvinceInnerTaskList(json, handler, "");
